@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Carola vehicle</title>
+  <desc id="desc">Vehicle image placeholder</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#182427"/>
+      <stop offset="0.58" stop-color="#0d1517"/>
+      <stop offset="1" stop-color="#13221f"/>
+    </linearGradient>
+    <linearGradient id="car" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b9f6d7"/>
+      <stop offset="0.55" stop-color="#73d8ae"/>
+      <stop offset="1" stop-color="#67a8ff"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="13"/></filter>
+  </defs>
+  <rect width="960" height="560" rx="36" fill="url(#bg)"/>
+  <circle cx="790" cy="80" r="220" fill="#6aa9ff" opacity=".07"/>
+  <circle cx="160" cy="520" r="250" fill="#8ce7bc" opacity=".08"/>
+  <path d="M208 361h560" stroke="#8ce7bc" stroke-width="24" stroke-linecap="round" opacity=".12" filter="url(#glow)"/>
+  <path d="M204 330c11-44 27-67 69-76l83-17 72-89c17-22 39-32 68-32h120c33 0 57 11 79 36l67 79 56 18c24 8 40 30 40 55v54c0 18-14 32-32 32h-38c-7-54-52-96-108-96s-102 42-109 96H389c-7-54-53-96-109-96s-101 42-108 96h-36c-18 0-32-14-32-32v-24c0-19 13-35 31-40l69-18z" fill="url(#car)"/>
+  <path d="M392 231l62-76c9-11 22-17 36-17h116c17 0 31 6 42 19l61 74H392z" fill="#0c1517" opacity=".84"/>
+  <path d="M521 138v93" stroke="#8ce7bc" stroke-width="5" opacity=".35"/>
+  <circle cx="280" cy="390" r="66" fill="#080d0f" stroke="#384b48" stroke-width="13"/>
+  <circle cx="280" cy="390" r="29" fill="#8ce7bc" opacity=".65"/>
+  <circle cx="680" cy="390" r="66" fill="#080d0f" stroke="#384b48" stroke-width="13"/>
+  <circle cx="680" cy="390" r="29" fill="#6aa9ff" opacity=".72"/>
+  <path d="M126 304h78M758 273h75" stroke="#eafff6" stroke-width="10" stroke-linecap="round" opacity=".68"/>
+  <text x="480" y="508" text-anchor="middle" fill="#7f9690" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="8">CAROLA</text>
+</svg>

@@ -1,0 +1,56 @@
+@model Carola.WebUI.Models.ReservationConfirmationViewModel
+@{
+    var isApproved = Model.Reservation.Status == "Onaylandı";
+    var isCancelled = Model.Reservation.Status == "İptal";
+    var statusClass = isApproved ? "approved" : isCancelled ? "cancelled" : "pending";
+    var statusIcon = isApproved ? "bi-check-lg" : isCancelled ? "bi-x-lg" : "bi-hourglass-split";
+    var statusTitle = isApproved
+        ? T.Translate("Rezervasyonunuz Onaylandı!", "Your Reservation Is Approved!")
+        : isCancelled
+            ? T.Translate("Rezervasyon İptal Edildi", "Reservation Cancelled")
+            : T.Translate("Rezervasyon Talebiniz Alındı", "Reservation Request Received");
+    var statusDescription = isApproved
+        ? T.Translate("Aracınız sizin için ayrıldı. Teklif ve kupon bilgileri e-posta adresinize gönderildi.", "Your vehicle is secured. The offer and coupon were sent to your email.")
+        : isCancelled
+            ? T.Translate("Bu rezervasyon artık aktif değil. Yeni bir araç seçerek tekrar rezervasyon oluşturabilirsiniz.", "This reservation is no longer active. You can select another vehicle and book again.")
+            : T.Translate("Talebiniz yönetim paneline iletildi. Onay verildiğinde bu ekran otomatik güncellenecek.", "Your request is awaiting admin approval. This page will update automatically.");
+}
+
+<div class="reservation-status-card @statusClass">
+    <div class="reservation-status-icon"><i class="bi @statusIcon"></i></div>
+    <span class="reservation-status-pill">@T.Translate(Model.Reservation.Status, isApproved ? "Approved" : isCancelled ? "Cancelled" : "Pending Approval")</span>
+    <h1>@statusTitle</h1>
+    <p>@statusDescription</p>
+    <div class="reservation-code-box">
+        <small>@T.Translate("REZERVASYON KODUNUZ", "YOUR RESERVATION CODE")</small>
+        <strong id="reservationCode">@Model.ReservationCode</strong>
+        <button type="button" onclick="navigator.clipboard.writeText('@Model.ReservationCode')" aria-label="@T.Translate("Kodu kopyala", "Copy code")"><i class="bi bi-copy"></i></button>
+    </div>
+</div>
+
+<div class="reservation-detail-card">
+    <div class="reservation-detail-head">
+        <div><i class="bi bi-receipt"></i><strong>@T.Translate("Rezervasyon Detayları", "Reservation Details")</strong></div>
+        <span>@Model.Reservation.PickupDate.ToString("dd MMM yyyy") - @Model.Reservation.ReturnDate.ToString("dd MMM yyyy")</span>
+    </div>
+    <div class="reservation-vehicle">
+        <div class="reservation-vehicle-icon"><i class="bi bi-car-front-fill"></i></div>
+        <div><small>@T.Translate("ARAÇ", "VEHICLE")</small><h3>@Model.Brand.BrandName @Model.Car.Model</h3><span>@T.Data(Model.Car.TransmissionType) · @T.Data(Model.Car.FuelType) · @Model.Car.SeatCount @T.Translate("Kişi", "Seats")</span></div>
+        <strong>₺@Model.Reservation.TotalPrice.ToString("N0")</strong>
+    </div>
+    <div class="reservation-info-grid">
+        <div><i class="bi bi-person"></i><span>@T.Translate("Müşteri", "Customer")</span><strong>@Model.Customer.FirstName @Model.Customer.LastName</strong></div>
+        <div><i class="bi bi-envelope"></i><span>@T.Translate("E-posta", "Email")</span><strong>@Model.Customer.Email</strong></div>
+        <div><i class="bi bi-geo-alt"></i><span>@T.Translate("Alış Şubesi", "Pick-up Branch")</span><strong>@T.Data(Model.PickupLocation.LocationName)</strong></div>
+        <div><i class="bi bi-pin-map"></i><span>@T.Translate("İade Şubesi", "Return Branch")</span><strong>@T.Data(Model.ReturnLocation.LocationName)</strong></div>
+    </div>
+</div>
+
+<div class="reservation-steps-card">
+    <h3>@T.Translate("Rezervasyon Süreci", "Reservation Progress")</h3>
+    <div class="reservation-progress">
+        <div class="done"><span>1</span><strong>@T.Translate("Talep Oluşturuldu", "Request Created")</strong><small>@T.Translate("Rezervasyonunuz kaydedildi", "Reservation saved")</small></div>
+        <div class="@(isApproved || isCancelled ? "done" : "current")"><span>2</span><strong>@T.Translate("Yönetici Kontrolü", "Admin Review")</strong><small>@T.Translate("Talep inceleniyor", "Request is being reviewed")</small></div>
+        <div class="@(isApproved ? "done" : isCancelled ? "cancelled" : "")"><span>3</span><strong>@T.Translate("Onay ve Teklif", "Approval & Offer")</strong><small>@T.Translate("E-posta ve %30 kupon", "Email and 30% coupon")</small></div>
+    </div>
+</div>

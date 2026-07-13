@@ -1,0 +1,222 @@
+@model Carola.WebUI.Models.CarListViewModel
+@{
+    ViewData["Title"] = T.Translate("Araç Listesi", "Vehicle List");
+}
+
+<!-- Page Header Hero -->
+<div class="hero-slider" style="height: 220px; background-image: url('https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&q=80&w=1920'); background-position: center 30%;">
+    <div class="container text-center" style="position: relative; z-index: 2;">
+        <h1 class="display-4 font-weight-bold" style="letter-spacing: 1px;">@T.Translate("Araç Filosu", "Our Fleet")</h1>
+        <p class="text-white-50">@T.Translate("Seyahatiniz için en uygun aracı seçin", "Choose the perfect car for your journey")</p>
+    </div>
+</div>
+
+<!-- Main Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            
+            <!-- Left Sidebar: Filters -->
+            <div class="col-lg-3">
+                <form method="GET" action="@Url.Action("CarList", "Car")" class="filter-card text-start">
+                    
+                    <div class="filter-title">@T.Translate("Arama ve Filtreleme", "Search & Filters")</div>
+                    
+                    <!-- Search Input -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Kelime ile Ara", "Search by keyword")</label>
+                        <div class="input-group">
+                            <input type="text" name="searchTerm" class="form-control" placeholder="@T.Translate("Model veya plaka...", "Model or plate...")" value="@Model.SearchTerm" />
+                            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Location Dropdown -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Alış Şubesi", "Pick-up Branch")</label>
+                        <select name="locationId" class="form-select">
+                            <option value="">@T.Translate("Tüm Şubeler", "All Branches")</option>
+                            @foreach (var branch in Model.Branches)
+                            {
+                                <option value="@branch.LocationId" selected="@(Model.SelectedLocationId == branch.LocationId ? "selected" : null)">@T.Data(branch.LocationName)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Category Dropdown -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Kategori", "Category")</label>
+                        <select name="categoryId" class="form-select">
+                            <option value="">@T.Translate("Tüm Kategoriler", "All Categories")</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.CarCategoryId" selected="@(Model.SelectedCategoryId == cat.CarCategoryId ? "selected" : null)">@T.Data(cat.CategoryName)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Brand Dropdown -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Marka", "Brand")</label>
+                        <select name="brandId" class="form-select">
+                            <option value="">@T.Translate("Tüm Markalar", "All Brands")</option>
+                            @foreach (var brand in Model.Brands)
+                            {
+                                <option value="@brand.BrandId" selected="@(Model.SelectedBrandId == brand.BrandId ? "selected" : null)">@brand.BrandName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Availability Date Fields -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Alış Tarihi", "Pick-up Date")</label>
+                        <input type="date" name="startDate" class="form-control mb-2" value="@Model.StartDate?.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        
+                        <label class="filter-section-title">@T.Translate("İade Tarihi", "Return Date")</label>
+                        <input type="date" name="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <!-- Price Slider accordion style -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Fiyat Aralığı (Günlük)", "Daily Price Range")</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" name="minPrice" class="form-control" placeholder="Min ₺" value="@Model.MinPrice" />
+                            </div>
+                            <div class="col-6">
+                                <input type="number" name="maxPrice" class="form-control" placeholder="Max ₺" value="@Model.MaxPrice" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seat count check list -->
+                    <div class="filter-group">
+                        <label class="filter-section-title">@T.Translate("Koltuk Sayısı", "Seats")</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="seatCount" id="seatAll" value="" checked="@(!Model.SelectedSeatCount.HasValue ? "checked" : null)">
+                            <label class="form-check-label" for="seatAll">@T.Translate("Fark etmez", "Any")</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="seatCount" id="seat2" value="2" checked="@(Model.SelectedSeatCount == 2 ? "checked" : null)">
+                            <label class="form-check-label" for="seat2">2+ @T.Translate("Koltuk (Spor)", "Seats (Sport)")</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="seatCount" id="seat5" value="5" checked="@(Model.SelectedSeatCount == 5 ? "checked" : null)">
+                            <label class="form-check-label" for="seat5">5+ @T.Translate("Koltuk (Standart)", "Seats (Standard)")</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="seatCount" id="seat7" value="7" checked="@(Model.SelectedSeatCount == 7 ? "checked" : null)">
+                            <label class="form-check-label" for="seat7">7+ @T.Translate("Koltuk (Geniş)", "Seats (Spacious)")</label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-primary-custom w-100 mt-2">@T.Translate("Filtrele", "Apply Filters")</button>
+                    <a href="@Url.Action("CarList", "Car")" class="btn btn-outline-secondary w-100 mt-2">@T.Translate("Temizle", "Clear")</a>
+
+                </form>
+            </div>
+
+            <!-- Right Column: Car Grid & Pagination -->
+            <div class="col-lg-9">
+                
+                @if (Model.StartDate.HasValue && Model.EndDate.HasValue)
+                {
+                    <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <div>
+                            <strong>@Model.StartDate?.ToString("dd.MM.yyyy")</strong> - <strong>@Model.EndDate?.ToString("dd.MM.yyyy")</strong>: @T.Translate("müsait araçlar listeleniyor.", "showing available vehicles.")
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Cars.Count == 0)
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-car-front text-muted" style="font-size: 64px;"></i>
+                        <h3 class="mt-3">@T.Translate("Aradığınız kriterlere uygun araç bulunamadı.", "No vehicle matches your criteria.")</h3>
+                        <p class="text-muted">@T.Translate("Lütfen filtreleri değiştirmeyi veya farklı tarihler seçmeyi deneyin.", "Try changing the filters or selecting different dates.")</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var car in Model.Cars)
+                        {
+                            var brandName = Model.Brands.FirstOrDefault(b => b.BrandId == car.BrandId)?.BrandName ?? "Car";
+                            string carImage = car.ImageUrl;
+                            if (string.IsNullOrEmpty(carImage) || carImage.StartsWith("/carola"))
+                            {
+                                carImage = car.Model switch
+                                {
+                                    "320i" => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600",
+                                    "C180" => "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600",
+                                    "Clio" => "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600",
+                                    "911 Carrera" => "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
+                                    "Corolla" => "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600",
+                                    "C 200" => "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=600",
+                                    "Hilux" => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600",
+                                    _ => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600"
+                                };
+                            }
+
+                            <div class="col-md-6">
+                                <div class="car-card">
+                                    <div class="car-card-img-wrapper">
+                                        <img src="@carImage" class="car-card-img" alt="@brandName @car.Model" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                                        <div class="car-card-badge"><i class="bi bi-star-fill"></i> 4.8</div>
+                                    </div>
+                                    <div class="car-card-body text-start">
+                                        <h3 class="car-card-title">@brandName @car.Model</h3>
+                                        <div class="car-card-price-row">
+                                            <span class="car-card-price">₺@car.DailyPrice.ToString("N0")</span>
+                                            <span class="car-card-price-period">/ @T.Translate("Günlük", "Day")</span>
+                                        </div>
+                                        <div class="car-card-specs">
+                                            <div class="car-card-spec-item"><i class="bi bi-fuel-pump"></i> @T.Data(car.FuelType)</div>
+                                            <div class="car-card-spec-item"><i class="bi bi-speedometer2"></i> @car.Mileage.ToString("N0") km</div>
+                                            <div class="car-card-spec-item"><i class="bi bi-people"></i> @car.SeatCount @T.Translate("Kişilik", "Seats")</div>
+                                            <div class="car-card-spec-item"><i class="bi bi-gear"></i> @T.Data(car.TransmissionType)</div>
+                                        </div>
+                                        
+                                        <!-- Carry date selections to booking page if present -->
+                                        <a href="@Url.Action("Index", "Booking", new { 
+                                            carId = car.CarId,
+                                            pickupDate = Model.StartDate?.ToString("yyyy-MM-dd"),
+                                            returnDate = Model.EndDate?.ToString("yyyy-MM-dd"),
+                                            pickupLocationId = Model.SelectedLocationId
+                                        })" class="car-card-btn text-decoration-none">@T.Translate("Hemen Kirala", "Rent Now")</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <nav class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("CarList", "Car", new {
+                                        categoryId = Model.SelectedCategoryId,
+                                        brandId = Model.SelectedBrandId,
+                                        locationId = Model.SelectedLocationId,
+                                        startDate = Model.StartDate?.ToString("yyyy-MM-dd"),
+                                        endDate = Model.EndDate?.ToString("yyyy-MM-dd"),
+                                        seatCount = Model.SelectedSeatCount,
+                                        minPrice = Model.MinPrice,
+                                        maxPrice = Model.MaxPrice,
+                                        searchTerm = Model.SearchTerm,
+                                        page = i
+                                    })">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            </div>
+
+        </div>
+    </div>
+</section>

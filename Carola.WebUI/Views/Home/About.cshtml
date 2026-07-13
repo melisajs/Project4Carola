@@ -1,0 +1,54 @@
+@model Carola.WebUI.Models.AboutPageViewModel
+@{
+    ViewData["Title"] = T.Translate("Hakkımızda", "About Us");
+}
+
+<header class="page-hero page-hero-about">
+    <div class="container page-hero-content">
+        <span class="page-kicker"><i class="bi bi-compass"></i> @T.Translate("Carola'yı Tanıyın", "Meet Carola")</span>
+        <h1>@T.Translate("Yolculuğunuzu kolaylaştırmak için buradayız.", "We are here to make every journey easier.")</h1>
+        <p>@T.Translate("Bakımlı araçlar, şeffaf fiyatlar ve size gerçekten ulaşan bir destek ekibiyle özgürce yola çıkın.", "Take the road freely with well-maintained cars, transparent pricing and a support team you can actually reach.")</p>
+        <div class="page-breadcrumb"><a asp-action="Index">@T.Translate("Ana Sayfa", "Home")</a><i class="bi bi-chevron-right"></i><span>@T.Translate("Hakkımızda", "About")</span></div>
+    </div>
+</header>
+
+<main class="about-page">
+    <section class="container about-story-section">
+        <div class="about-image-stack">
+            <img class="about-main-image" src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=85&w=1100" alt="@T.Translate("Carola ile yolculuk", "A journey with Carola")" />
+            <div class="about-experience-card"><strong>10+</strong><span>@T.Translate("yıllık yol deneyimi", "years on the road")</span></div>
+        </div>
+        <div class="about-story-copy">
+            <span class="section-subtitle text-start">@T.Translate("Bizim Hikâyemiz", "Our Story")</span>
+            <h2>@T.Translate("Sadece araç değil, güvenli bir yol arkadaşı sunuyoruz.", "More than a car, we provide a trusted travel partner.")</h2>
+            <p>@T.Translate("Carola, araç kiralamayı karmaşık koşullardan kurtarıp hızlı, anlaşılır ve güvenilir bir deneyime dönüştürmek için kuruldu. Rezervasyondan araç teslimine kadar tüm adımları sadeleştiriyoruz.", "Carola was created to turn car rental from a complicated process into a fast, clear and reliable experience. We simplify every step from booking to vehicle delivery.")</p>
+            <p>@T.Translate("Her aracımız düzenli bakım ve güvenlik kontrollerinden geçer. Şubelerimiz ve 7/24 destek ekibimiz yolculuğunuz boyunca yanınızdadır.", "Every vehicle goes through regular maintenance and safety checks. Our branches and 24/7 support team stay with you throughout your journey.")</p>
+            <div class="about-check-list">
+                <span><i class="bi bi-check2-circle"></i>@T.Translate("Gizli ücret yok", "No hidden fees")</span>
+                <span><i class="bi bi-check2-circle"></i>@T.Translate("Hızlı rezervasyon", "Fast booking")</span>
+                <span><i class="bi bi-check2-circle"></i>@T.Translate("7/24 yol desteği", "24/7 road support")</span>
+                <span><i class="bi bi-check2-circle"></i>@T.Translate("Bakımlı araç filosu", "Well-maintained fleet")</span>
+            </div>
+            <a asp-controller="Car" asp-action="CarList" class="btn btn-primary btn-primary-custom">@T.Translate("Araçları İncele", "Explore Vehicles") <i class="bi bi-arrow-right"></i></a>
+        </div>
+    </section>
+
+    <section class="about-stats-band">
+        <div class="container about-stats-grid">
+            <div><i class="bi bi-car-front"></i><strong>@Model.CarCount+</strong><span>@T.Translate("Kiralık Araç", "Rental Vehicles")</span></div>
+            <div><i class="bi bi-patch-check"></i><strong>@Model.BrandCount+</strong><span>@T.Translate("Seçkin Marka", "Premium Brands")</span></div>
+            <div><i class="bi bi-geo-alt"></i><strong>@Model.BranchCount+</strong><span>@T.Translate("Hizmet Noktası", "Service Locations")</span></div>
+            <div><i class="bi bi-headset"></i><strong>7/24</strong><span>@T.Translate("Kesintisiz Destek", "Continuous Support")</span></div>
+        </div>
+    </section>
+
+    <section class="container about-values-section">
+        <div class="section-subtitle">@T.Translate("Carola Farkı", "The Carola Difference")</div>
+        <h2 class="section-title">@T.Translate("Her kilometrede aynı özen", "The same care in every mile")</h2>
+        <div class="about-values-grid">
+            <article><span>01</span><i class="bi bi-shield-check"></i><h3>@T.Translate("Güven Önce", "Safety First")</h3><p>@T.Translate("Teslim öncesi çok noktalı kontrol ve düzenli bakım standardı.", "Multi-point inspection before delivery and a consistent maintenance standard.")</p></article>
+            <article><span>02</span><i class="bi bi-receipt"></i><h3>@T.Translate("Şeffaf Fiyat", "Transparent Pricing")</h3><p>@T.Translate("Rezervasyon başında gördüğünüz fiyatı, açık koşullarla sunuyoruz.", "The price you see at booking is presented with clear terms.")</p></article>
+            <article><span>03</span><i class="bi bi-emoji-smile"></i><h3>@T.Translate("İnsan Odaklı", "People Focused")</h3><p>@T.Translate("Sorunları yönlendiren değil, çözen ulaşılabilir bir ekip.", "An accessible team that solves problems instead of redirecting them.")</p></article>
+        </div>
+    </section>
+</main>

@@ -1,0 +1,335 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Araç Yönetimi";
+    var carsList = (ViewBag.CarsList as System.Collections.IEnumerable)?.Cast<dynamic>().ToList() ?? new List<dynamic>();
+    var brands = ViewBag.Brands as List<CarolaEnditiyLayer.Entities.Brand> ?? new();
+    var categories = ViewBag.Categories as List<CarolaEnditiyLayer.Entities.Category> ?? new();
+    var locations = ViewBag.Locations as List<CarolaEnditiyLayer.Entities.Location> ?? new();
+}
+
+<section class="hero glass text-start">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="hero-breadcrumb">
+                <i class="bi bi-car-front-fill"></i>
+                Araç Yönetimi / Araç Listesi
+            </span>
+            <h1>Araç envanterini ve günlük filo hareketlerini yönetin</h1>
+            <p>Filodaki tüm araçların teknik özelliklerini, şubelerini ve kiralama fiyatlarını güncelleyebilirsiniz.</p>
+        </div>
+        <button class="btn btn-accent px-4 py-2" data-bs-toggle="modal" data-bs-target="#addCarModal">
+            <i class="bi bi-plus-lg"></i> Yeni Araç Ekle
+        </button>
+    </div>
+</section>
+
+<!-- Cars Table List -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-list-stars text-primary"></i> Filo Envanteri</h3>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Görsel</th>
+                    <th>Araç Tanımı</th>
+                    <th>Plaka</th>
+                    <th>Şube</th>
+                    <th>Kategori</th>
+                    <th>Günlük Ücret</th>
+                    <th>Özellikler</th>
+                    <th>Durum</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (carsList == null || carsList.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">Kayıtlı araç bulunmamaktadır.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in carsList)
+                    {
+                        string statusText = item.Car.IsAvailable ? "Müsait" : "Kirada/Bakımda";
+                        string statusBadge = item.Car.IsAvailable ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning";
+                        string adminCarImage = Carola.WebUI.Services.VehicleImageHelper.Resolve(Convert.ToString(item.Car.ImageUrl), Convert.ToString(item.Car.Model));
+
+                        <tr>
+                            <td>
+                                <img src="@adminCarImage" alt="@item.Car.Model" class="admin-thumb" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                            </td>
+                            <td>
+                                <strong class="text-white d-block">@item.BrandName @item.Car.Model</strong>
+                                <span class="text-muted" style="font-size: 11px;">@item.Car.ModelYear Model</span>
+                            </td>
+                            <td><span class="badge bg-secondary">@item.Car.PlateNumber</span></td>
+                            <td>@item.LocationName</td>
+                            <td>@item.CategoryName</td>
+                            <td><strong>₺@item.Car.DailyPrice.ToString("N0")</strong></td>
+                            <td style="font-size: 12px; color: var(--muted);">
+                                @item.Car.FuelType | @item.Car.TransmissionType | @item.Car.SeatCount Kişilik
+                            </td>
+                            <td>
+                                <span class="badge @statusBadge">@statusText</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-light btn-sm me-2 edit-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editCarModal"
+                                        data-id="@item.Car.CarId"
+                                        data-brandid="@item.Car.BrandId"
+                                        data-model="@item.Car.Model"
+                                        data-year="@item.Car.ModelYear"
+                                        data-plate="@item.Car.PlateNumber"
+                                        data-price="@item.Car.DailyPrice"
+                                        data-seats="@item.Car.SeatCount"
+                                        data-luggage="@item.Car.LuggageCapacity"
+                                        data-mileage="@item.Car.Mileage"
+                                        data-fuel="@item.Car.FuelType"
+                                        data-trans="@item.Car.TransmissionType"
+                                        data-catid="@item.Car.CategoryId"
+                                        data-locid="@item.Car.LocationId"
+                                        data-img="@item.Car.ImageUrl"
+                                        data-available="@item.Car.IsAvailable.ToString().ToLower()">
+                                    Düzenle
+                                </button>
+                                <a href="@Url.Action("Delete", "AdminCar", new { id = item.Car.CarId })" class="btn btn-danger-soft btn-sm" onclick="return confirm('Bu aracı silmek istediğinize emin misiniz?')">Sil</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Car Modal -->
+<div class="modal fade" id="addCarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Yeni Araç Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Create", "AdminCar")">
+                <div class="modal-body p-4 text-start">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Marka Seç *</label>
+                            <select name="BrandId" class="form-select" required>
+                                @foreach (var b in brands)
+                                {
+                                    <option value="@b.BrandId">@b.BrandName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Model Adı *</label>
+                            <input type="text" name="Model" class="form-control" placeholder="Örn: 320i" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Model Yılı *</label>
+                            <input type="number" name="ModelYear" class="form-control" value="2023" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Plaka Numarası *</label>
+                            <input type="text" name="PlateNumber" class="form-control" placeholder="Örn: 07 ABC 123" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Günlük Kiralama Fiyatı (₺) *</label>
+                            <input type="number" name="DailyPrice" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Koltuk Sayısı *</label>
+                            <input type="number" name="SeatCount" class="form-control" value="5" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bagaj Hacmi (Koli/Çanta) *</label>
+                            <input type="number" name="LuggageCapacity" class="form-control" value="450" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Güncel Kilometre *</label>
+                            <input type="number" name="Mileage" class="form-control" value="10000" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Yakıt Tipi *</label>
+                            <select name="FuelType" class="form-select">
+                                <option value="Benzin">Benzin</option>
+                                <option value="Dizel">Dizel</option>
+                                <option value="Hibrit">Hibrit</option>
+                                <option value="Elektrik">Elektrik</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vites Tipi *</label>
+                            <select name="TransmissionType" class="form-select">
+                                <option value="Otomatik">Otomatik</option>
+                                <option value="Manuel">Manuel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Kategori *</label>
+                            <select name="CategoryId" class="form-select" required>
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.CarCategoryId">@c.CategoryName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bulunduğu Şube *</label>
+                            <select name="LocationId" class="form-select" required>
+                                @foreach (var l in locations)
+                                {
+                                    <option value="@l.LocationId">@l.LocationName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Görsel URL *</label>
+                            <input type="text" name="ImageUrl" class="form-control" placeholder="https://..." required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Aracı Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Car Modal -->
+<div class="modal fade" id="editCarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Araç Bilgilerini Düzenle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Edit", "AdminCar")">
+                <input type="hidden" name="CarId" id="editCarId" />
+                <div class="modal-body p-4 text-start">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Marka Seç *</label>
+                            <select name="BrandId" id="editBrandId" class="form-select" required>
+                                @foreach (var b in brands)
+                                {
+                                    <option value="@b.BrandId">@b.BrandName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Model Adı *</label>
+                            <input type="text" name="Model" id="editModel" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Model Yılı *</label>
+                            <input type="number" name="ModelYear" id="editModelYear" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Plaka Numarası *</label>
+                            <input type="text" name="PlateNumber" id="editPlateNumber" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Günlük Kiralama Fiyatı (₺) *</label>
+                            <input type="number" name="DailyPrice" id="editDailyPrice" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Koltuk Sayısı *</label>
+                            <input type="number" name="SeatCount" id="editSeatCount" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bagaj Hacmi (Koli/Çanta) *</label>
+                            <input type="number" name="LuggageCapacity" id="editLuggageCapacity" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Güncel Kilometre *</label>
+                            <input type="number" name="Mileage" id="editMileage" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Yakıt Tipi *</label>
+                            <select name="FuelType" id="editFuelType" class="form-select">
+                                <option value="Benzin">Benzin</option>
+                                <option value="Dizel">Dizel</option>
+                                <option value="Hibrit">Hibrit</option>
+                                <option value="Elektrik">Elektrik</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vites Tipi *</label>
+                            <select name="TransmissionType" id="editTransmissionType" class="form-select">
+                                <option value="Otomatik">Otomatik</option>
+                                <option value="Manuel">Manuel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Kategori *</label>
+                            <select name="CategoryId" id="editCategoryId" class="form-select" required>
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.CarCategoryId">@c.CategoryName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bulunduğu Şube *</label>
+                            <select name="LocationId" id="editLocationId" class="form-select" required>
+                                @foreach (var l in locations)
+                                {
+                                    <option value="@l.LocationId">@l.LocationName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Görsel URL *</label>
+                            <input type="text" name="ImageUrl" id="editImageUrl" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Müsaitlik Durumu *</label>
+                            <select name="IsAvailable" id="editIsAvailable" class="form-select">
+                                <option value="true">Müsait</option>
+                                <option value="false">Müsait Değil</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Populate edit modal fields on click
+        const editButtons = document.querySelectorAll('.edit-btn');
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editCarId').value = btn.dataset.id;
+                document.getElementById('editBrandId').value = btn.dataset.brandid;
+                document.getElementById('editModel').value = btn.dataset.model;
+                document.getElementById('editModelYear').value = btn.dataset.year;
+                document.getElementById('editPlateNumber').value = btn.dataset.plate;
+                document.getElementById('editDailyPrice').value = btn.dataset.price;
+                document.getElementById('editSeatCount').value = btn.dataset.seats;
+                document.getElementById('editLuggageCapacity').value = btn.dataset.luggage;
+                document.getElementById('editMileage').value = btn.dataset.mileage;
+                document.getElementById('editFuelType').value = btn.dataset.fuel;
+                document.getElementById('editTransmissionType').value = btn.dataset.trans;
+                document.getElementById('editCategoryId').value = btn.dataset.catid;
+                document.getElementById('editLocationId').value = btn.dataset.locid;
+                document.getElementById('editImageUrl').value = btn.dataset.img;
+                document.getElementById('editIsAvailable').value = btn.dataset.available;
+            });
+        });
+    </script>
+}

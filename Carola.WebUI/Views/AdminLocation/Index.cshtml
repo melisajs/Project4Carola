@@ -1,0 +1,164 @@
+@model List<CarolaEnditiyLayer.Entities.Location>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Şube Yönetimi";
+}
+
+<section class="hero glass text-start">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="hero-breadcrumb">
+                <i class="bi bi-geo-alt-fill"></i>
+                Filo Yönetimi / Şubeler
+            </span>
+            <h1>Hizmet lokasyonlarını ve şubeleri yönetin</h1>
+            <p>Havalimanı ve şehir ofislerinize ait adres ve yetkili kişi bilgilerini buradan düzenleyebilirsiniz.</p>
+        </div>
+        <button class="btn btn-accent px-4 py-2" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+            <i class="bi bi-plus-lg"></i> Yeni Şube Ekle
+        </button>
+    </div>
+</section>
+
+<!-- Locations List Table -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-geo-fill"></i> Şube Listesi</h3>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Şube Kodu</th>
+                    <th>Şube Adı</th>
+                    <th>Şehir</th>
+                    <th>Adres</th>
+                    <th>Yetkili Personel</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Kayıtlı şube bulunmamaktadır.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var loc in Model)
+                    {
+                        string code = loc.LocationName.Substring(0, 3).ToUpper();
+                        <tr>
+                            <td><strong class="text-primary">@code</strong></td>
+                            <td><strong class="text-white">@loc.LocationName</strong></td>
+                            <td>@loc.City</td>
+                            <td>@loc.Address</td>
+                            <td>@loc.AuthorizedPerson</td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-light btn-sm me-2 edit-loc-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editLocationModal"
+                                        data-id="@loc.LocationId"
+                                        data-name="@loc.LocationName"
+                                        data-city="@loc.City"
+                                        data-address="@loc.Address"
+                                        data-person="@loc.AuthorizedPerson">
+                                    Düzenle
+                                </button>
+                                <a href="@Url.Action("Delete", "AdminLocation", new { id = loc.LocationId })" class="btn btn-danger-soft btn-sm" onclick="return confirm('Bu şubeyi silmek istediğinize emin misiniz?')">Sil</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Location Modal -->
+<div class="modal fade" id="addLocationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Yeni Şube Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Create", "AdminLocation")">
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Şube Adı *</label>
+                        <input type="text" name="LocationName" class="form-control" placeholder="Örn: Antalya Havalimanı" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Şehir *</label>
+                        <input type="text" name="City" class="form-control" placeholder="Örn: Antalya" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adres *</label>
+                        <input type="text" name="Address" class="form-control" placeholder="Adres açıklaması..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Yetkili Kişi *</label>
+                        <input type="text" name="AuthorizedPerson" class="form-control" placeholder="Yetkili personel adı..." required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Şube Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Location Modal -->
+<div class="modal fade" id="editLocationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Şube Düzenle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Edit", "AdminLocation")">
+                <input type="hidden" name="LocationId" id="editLocationId" />
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Şube Adı *</label>
+                        <input type="text" name="LocationName" id="editLocationName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Şehir *</label>
+                        <input type="text" name="City" id="editCity" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adres *</label>
+                        <input type="text" name="Address" id="editAddress" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Yetkili Kişi *</label>
+                        <input type="text" name="AuthorizedPerson" id="editAuthorizedPerson" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editLocBtns = document.querySelectorAll('.edit-loc-btn');
+        editLocBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editLocationId').value = btn.dataset.id;
+                document.getElementById('editLocationName').value = btn.dataset.name;
+                document.getElementById('editCity').value = btn.dataset.city;
+                document.getElementById('editAddress').value = btn.dataset.address;
+                document.getElementById('editAuthorizedPerson').value = btn.dataset.person;
+            });
+        });
+    </script>
+}

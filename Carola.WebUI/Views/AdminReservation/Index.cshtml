@@ -1,0 +1,103 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Rezervasyon Yönetimi";
+    var reservations = (ViewBag.ReservationsList as System.Collections.IEnumerable)?.Cast<dynamic>().ToList() ?? new List<dynamic>();
+}
+
+<section class="hero glass text-start">
+    <div>
+        <span class="hero-breadcrumb">
+            <i class="bi bi-calendar-check-fill"></i>
+            Rezervasyon Yönetimi / Tüm Rezervasyonlar
+        </span>
+        <h1>Rezervasyon süreçlerini ve müşteri taleplerini kontrol edin</h1>
+        <p>
+            Müşterilerin oluşturduğu tüm kiralama isteklerini listeleyip onaylayabilir veya iptal edebilirsiniz.
+        </p>
+    </div>
+</section>
+
+@if (TempData["Success"] is string successMessage)
+{
+    <div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i>@successMessage</div>
+}
+@if (TempData["Info"] is string infoMessage)
+{
+    <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>@infoMessage</div>
+}
+@if (TempData["Error"] is string errorMessage)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMessage</div>
+}
+
+<!-- Reservations Table Card -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-card-list text-primary"></i> Rezervasyon Listesi</h3>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Müşteri Bilgileri</th>
+                    <th>Araç</th>
+                    <th>Alış Şubesi</th>
+                    <th>İade Şubesi</th>
+                    <th>Tarih Aralığı</th>
+                    <th>Toplam Tutar</th>
+                    <th>Durum</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (reservations == null || reservations.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">Kayıtlı rezervasyon bulunmamaktadır.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in reservations)
+                    {
+                        string statusClass = item.Reservation.Status switch
+                        {
+                            "Onaylandı" => "bg-success-subtle text-success",
+                            "İptal" => "bg-danger-subtle text-danger",
+                            _ => "bg-warning-subtle text-warning"
+                        };
+
+                        <tr>
+                            <td>
+                                <strong class="d-block text-white">@item.CustomerName</strong>
+                                <span class="text-muted" style="font-size: 11px;">@item.CustomerEmail</span>
+                            </td>
+                            <td>@item.CarModel</td>
+                            <td>@item.PickupLocationName</td>
+                            <td>@item.ReturnLocationName</td>
+                            <td>@item.Reservation.PickupDate.ToString("dd.MM.yyyy") / @item.Reservation.ReturnDate.ToString("dd.MM.yyyy")</td>
+                            <td><strong>₺@item.Reservation.TotalPrice.ToString("N2")</strong></td>
+                            <td>
+                                <span class="badge @statusClass">@item.Reservation.Status</span>
+                            </td>
+                            <td class="text-end">
+                                @if (item.Reservation.Status == "Bekliyor")
+                                {
+                                    <a href="@Url.Action("Approve", "AdminReservation", new { id = item.Reservation.ReservationId })" class="btn btn-success btn-sm me-2 rounded-pill px-3">
+                                        <i class="bi bi-check-lg"></i> Onayla
+                                    </a>
+                                    <a href="@Url.Action("Reject", "AdminReservation", new { id = item.Reservation.ReservationId })" class="btn btn-danger btn-sm rounded-pill px-3">
+                                        <i class="bi bi-x-lg"></i> İptal Et
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size: 12px;">İşlem Tamamlandı</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

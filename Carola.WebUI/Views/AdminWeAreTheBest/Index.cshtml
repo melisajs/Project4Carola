@@ -1,0 +1,69 @@
+@model CarolaEnditiyLayer.Entities.WeAreTheBest
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "We Are The Best Yönetimi";
+}
+
+<section class="hero glass text-start">
+    <div>
+        <span class="hero-breadcrumb">
+            <i class="bi bi-award-fill"></i>
+            Site Yönetimi / We Are The Best
+        </span>
+        <h1>Ana sayfa "Biz En İyisiyiz" alanını yönetin</h1>
+        <p>Ana sayfada yer alan firma özellikleri, başlık ve açıklama alanlarını buradan güncelleyebilirsiniz.</p>
+    </div>
+</section>
+
+<!-- Edit Form -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-pencil-square text-primary"></i> İçerik Ayarları</h3>
+
+    <form method="POST" action="@Url.Action("Edit", "AdminWeAreTheBest")">
+        <input type="hidden" asp-for="WeAreTheBestId" />
+        
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Ana Başlık *</label>
+                <input type="text" asp-for="Title" class="form-control" required />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Açıklama Metni *</label>
+                <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+            </div>
+
+            <!-- Feature 1 -->
+            <div class="col-md-6 border-end border-secondary border-opacity-25 pe-md-4 mt-4">
+                <h4 class="fs-6 font-weight-bold mb-3 text-primary"><i class="bi bi-geo-alt-fill"></i> 1. Özellik (Feature 1)</h4>
+                
+                <div class="mb-3">
+                    <label class="form-label">Özellik Başlığı *</label>
+                    <input type="text" asp-for="Feature1Title" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Özellik Açıklaması *</label>
+                    <textarea asp-for="Feature1Description" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 ps-md-4 mt-4">
+                <h4 class="fs-6 font-weight-bold mb-3 text-primary"><i class="bi bi-shield-check"></i> 2. Özellik (Feature 2)</h4>
+                
+                <div class="mb-3">
+                    <label class="form-label">Özellik Başlığı *</label>
+                    <input type="text" asp-for="Feature2Title" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Özellik Açıklaması *</label>
+                    <textarea asp-for="Feature2Description" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+
+            <div class="col-12 border-top border-secondary border-opacity-25 pt-4 text-end">
+                <button type="submit" class="btn btn-accent px-5 py-2">Bilgileri Güncelle</button>
+            </div>
+        </div>
+    </form>
+</div>

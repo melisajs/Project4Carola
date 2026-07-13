@@ -1,0 +1,277 @@
+@{
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var encodedReturnUrl = System.Uri.EscapeDataString(returnUrl);
+    var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="@(isEnglish ? "en" : "tr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | Carola - Drive Easy</title>
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    
+    <!-- Top Bar -->
+    <div class="top-bar d-none d-lg-block">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <span class="top-bar-item"><i class="bi bi-clock"></i> @T.Translate("Açılış Saatleri: Pzt - Cuma 08.00 - 18.00", "Opening Hours: Mon - Fri 08:00 - 18:00")</span>
+            </div>
+            <div>
+                <span class="top-bar-item"><i class="bi bi-telephone"></i> +90 850 360 26 52</span>
+                <span class="top-bar-item"><i class="bi bi-envelope"></i> info@carola.com</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-car-front-fill"></i> Carola
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">@T.Translate("Ana Sayfa", "Home")</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(currentController == "Car" ? "active" : "")" asp-controller="Car" asp-action="CarList">@T.Translate("Araç Filosu", "Our Fleet")</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(currentController == "Home" && currentAction == "About" ? "active" : "")" asp-controller="Home" asp-action="About">@T.Translate("Hakkımızda", "About")</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(currentController == "Booking" && currentAction == "Track" ? "active" : "")" asp-controller="Booking" asp-action="Track">@T.Translate("Rezervasyon Sorgula", "Track Reservation")</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(currentController == "Home" && currentAction == "Contact" ? "active" : "")" asp-controller="Home" asp-action="Contact">@T.Translate("İletişim", "Contact")</a>
+                    </li>
+                </ul>
+                <div class="navbar-actions">
+                    <button class="navbar-btn-search"><i class="bi bi-search"></i></button>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white dropdown-toggle p-0 d-flex align-items-center gap-1 text-decoration-none" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="fs-6 fw-bold">@(isEnglish ? "EN" : "TR")</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="langDropdown">
+                            <li><a class="dropdown-item text-white" href="/Language/Set?culture=en-US&returnUrl=@encodedReturnUrl">EN - English</a></li>
+                            <li><a class="dropdown-item text-white" href="/Language/Set?culture=tr-TR&returnUrl=@encodedReturnUrl">TR - Türkçe</a></li>
+                        </ul>
+                    </div>
+
+                    <a class="btn account-btn" asp-controller="AdminLayout" asp-action="Index">@T.Translate("Yönetim Paneli", "Admin Panel")</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    @RenderBody()
+
+    <!-- Footer Banner -->
+    <div class="container">
+        <div class="subscribe-banner">
+            <div class="container px-4">
+                <div class="row align-items-center">
+                    <div class="col-md-7 mb-3 mb-md-0">
+                        <div class="subscribe-title">@T.Translate("Carola kampanyalarından ilk siz haberdar olun", "Be the first to hear about Carola offers")</div>
+                        <p class="m-0 text-white-50">@T.Translate("Kampanyalar ve yeni araçlar e-postanıza gelsin.", "Get new cars and exclusive offers in your inbox.")</p>
+                    </div>
+                    <div class="col-md-5">
+                        <form class="subscribe-form">
+                            <input type="email" class="subscribe-input" placeholder="@T.Translate("E-posta Adresiniz", "Your email address")" required />
+                            <button type="submit" class="subscribe-btn">@T.Translate("Abone Ol", "Subscribe") <i class="bi bi-arrow-right"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Footer -->
+    <footer class="footer-main">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-5 mb-lg-0">
+                    <a class="navbar-brand navbar-brand-custom mb-3" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-car-front-fill"></i> Carola
+                    </a>
+                    <p class="mt-3">@T.Translate("Yolculuğunuzu kolaylaştıracak, konforlu ve güvenilir araç kiralama hizmetleri sunuyoruz.", "Comfortable and reliable car rental services designed to make every journey easier.")</p>
+                    <div class="footer-socials">
+                        <a href="#" class="footer-social-btn"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-5 mb-lg-0">
+                    <div class="footer-title">@T.Translate("Kaynaklar", "Resources")</div>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="About">@T.Translate("Hakkımızda", "About Us")</a></li>
+                        <li><a asp-controller="Car" asp-action="CarList">@T.Translate("Araç Filosu", "Our Fleet")</a></li>
+                        <li><a asp-controller="Booking" asp-action="Track">@T.Translate("Rezervasyon Sorgula", "Track Reservation")</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact">@T.Translate("Destek", "Support")</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-5 mb-lg-0">
+                    <div class="footer-title">@T.Translate("Topluluk", "Explore")</div>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Index">@T.Translate("Kampanyalar", "Offers")</a></li>
+                        <li><a asp-controller="Home" asp-action="About">@T.Translate("Neden Carola?", "Why Carola?")</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact">@T.Translate("Bize Ulaşın", "Contact Us")</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-title">@T.Translate("İletişim", "Contact")</div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>@T.Translate("Maslak Mah. Büyükdere Cad. No: 245, Sarıyer / İstanbul", "Maslak District, Buyukdere Ave. No: 245, Sariyer / Istanbul")</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-envelope"></i>
+                        <span>info@carola.com</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-telephone"></i>
+                        <span>+90 850 360 26 52</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+        <div class="container text-center">
+            <p class="m-0">Copyright &copy; @DateTime.Now.Year Carola, Inc. @T.Translate("Tüm Hakları Saklıdır.", "All rights reserved.")</p>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop"><i class="bi bi-arrow-up"></i></div>
+
+    <!-- Chatbot Floating Button -->
+    <div class="chatbot-toggle-btn" id="chatbotToggle"><i class="bi bi-chat-dots-fill"></i></div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span class="chatbot-status-dot"></span> @T.Translate("Carola Asistan", "Carola Assistant")
+            </div>
+            <button class="btn btn-link text-white p-0" id="chatbotClose"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="chatbot-message chatbot-message-bot">
+                @T.Translate("Merhaba! Carola Asistan'a hoş geldiniz. Size uygun araç bulmamda yardımcı olabilirim. Nasıl bir sürüş deneyimi istersiniz?", "Hello! Welcome to Carola Assistant. I can help you find the right vehicle. What kind of driving experience are you looking for?")
+            </div>
+        </div>
+        <div class="chatbot-footer">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="@T.Translate("Mesajınızı yazın...", "Type your message...")" />
+            <button class="chatbot-send-btn" id="chatbotSend"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SignalR Client Library CDN -->
+    <script src="~/js/signalr.min.js" asp-append-version="true"></script>
+    
+    <script>
+        // Back to top scroll handler
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Chatbot Widget Toggle
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotWidget = document.getElementById('chatbotWidget');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotBody = document.getElementById('chatbotBody');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbotWidget.classList.toggle('open');
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotWidget.classList.remove('open');
+        });
+
+        // SignalR Chatbot Setup
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", function (sender, message) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("chatbot-message");
+            if (sender === "User") {
+                msgDiv.classList.add("chatbot-message-user");
+            } else {
+                msgDiv.classList.add("chatbot-message-bot");
+            }
+            msgDiv.innerHTML = message;
+            chatbotBody.appendChild(msgDiv);
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        });
+
+        async function startChatConnection() {
+            try {
+                await connection.start();
+            } catch {
+                window.setTimeout(startChatConnection, 3000);
+            }
+        }
+        startChatConnection();
+
+        function sendMessage() {
+            const messageText = chatbotInput.value.trim();
+            if (messageText !== "") {
+                connection.invoke("SendMessage", "User", messageText).catch(function (err) {
+                    return console.error(err.toString());
+                });
+                chatbotInput.value = "";
+            }
+        }
+
+        chatbotSend.addEventListener('click', sendMessage);
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Carola.BusinessLayer/Carola.BusinessLayer.csproj" />
+  <Project Path="Carola.DataAccessLayer/Carola.DataAccessLayer.csproj" />
+  <Project Path="Carola.WebUI/Carola.WebUI.csproj" />
+  <Project Path="CarolaEnditiyLayer/CarolaEnditiyLayer.csproj" />
+</Solution>

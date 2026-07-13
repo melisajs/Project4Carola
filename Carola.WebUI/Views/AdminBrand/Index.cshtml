@@ -1,0 +1,168 @@
+@model List<CarolaEnditiyLayer.Entities.Brand>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Marka Yönetimi";
+}
+
+<section class="hero glass text-start">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="hero-breadcrumb">
+                <i class="bi bi-tag-fill"></i>
+                Filo Yönetimi / Markalar
+            </span>
+            <h1>Markaları yönetin ve marka envanterinizi güncelleyin</h1>
+            <p>Filoda listelenen araçların markalarını ve logolarını buradan yönetebilirsiniz.</p>
+        </div>
+        <button class="btn btn-accent px-4 py-2" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+            <i class="bi bi-plus-lg"></i> Yeni Marka Ekle
+        </button>
+    </div>
+</section>
+
+<!-- Brands List Table -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-list-task text-primary"></i> Marka Listesi</h3>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Marka Adı</th>
+                    <th>Durum</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Kayıtlı marka bulunmamaktadır.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var brand in Model)
+                    {
+                        string statusText = brand.Status ? "Aktif" : "Pasif";
+                        string statusBadge = brand.Status ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger";
+                        string logoUrl = brand.LogoUrl;
+                        if (string.IsNullOrEmpty(logoUrl) || logoUrl.StartsWith("/carola"))
+                        {
+                            logoUrl = brand.BrandName.ToLower() switch
+                            {
+                                "volkswagen" => "https://i.ibb.co/TqM7Kcr/vw-logo.png",
+                                "toyota" => "https://i.ibb.co/v4KjNrm/toyota-logo.png",
+                                "peugeot" => "https://i.ibb.co/K2sY4F3/peugeot-logo.png",
+                                "renault" => "https://i.ibb.co/g7z6Mh2/renault-logo.png",
+                                "porsche" => "https://i.ibb.co/ZJ4D7zW/porsche-logo.png",
+                                _ => "https://i.ibb.co/v4KjNrm/toyota-logo.png"
+                            };
+                        }
+
+                        <tr>
+                            <td>
+                                <img src="@logoUrl" alt="@brand.BrandName" class="admin-thumb" style="object-fit:contain;padding:5px;" onerror="this.onerror=null;this.src='/images/brand-placeholder.svg';" />
+                            </td>
+                            <td><strong class="text-white">@brand.BrandName</strong></td>
+                            <td>
+                                <span class="badge @statusBadge">@statusText</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-light btn-sm me-2 edit-brand-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editBrandModal"
+                                        data-id="@brand.BrandId"
+                                        data-name="@brand.BrandName"
+                                        data-logo="@brand.LogoUrl"
+                                        data-status="@brand.Status.ToString().ToLower()">
+                                    Düzenle
+                                </button>
+                                <a href="@Url.Action("Delete", "AdminBrand", new { id = brand.BrandId })" class="btn btn-danger-soft btn-sm" onclick="return confirm('Bu markayı silmek istediğinize emin misiniz?')">Sil</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Brand Modal -->
+<div class="modal fade" id="addBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Yeni Marka Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Create", "AdminBrand")">
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Marka Adı *</label>
+                        <input type="text" name="BrandName" class="form-control" placeholder="Örn: BMW" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo URL *</label>
+                        <input type="text" name="LogoUrl" class="form-control" placeholder="https://..." required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Marka Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Brand Modal -->
+<div class="modal fade" id="editBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Marka Düzenle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Edit", "AdminBrand")">
+                <input type="hidden" name="BrandId" id="editBrandId" />
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Marka Adı *</label>
+                        <input type="text" name="BrandName" id="editBrandName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo URL *</label>
+                        <input type="text" name="LogoUrl" id="editLogoUrl" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Durum *</label>
+                        <select name="Status" id="editBrandStatus" class="form-select">
+                            <option value="true">Aktif</option>
+                            <option value="false">Pasif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editBrandBtns = document.querySelectorAll('.edit-brand-btn');
+        editBrandBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editBrandId').value = btn.dataset.id;
+                document.getElementById('editBrandName').value = btn.dataset.name;
+                document.getElementById('editLogoUrl').value = btn.dataset.logo;
+                document.getElementById('editBrandStatus').value = btn.dataset.status;
+            });
+        });
+    </script>
+}

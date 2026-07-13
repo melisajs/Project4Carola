@@ -1,0 +1,257 @@
+@model Carola.WebUI.Models.HomeIndexViewModel
+@{
+    ViewData["Title"] = T.Translate("Ana Sayfa", "Home");
+    var activeSlider = Model.Sliders.FirstOrDefault();
+    var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+    var sliderTitle = isEnglish
+        ? activeSlider?.Title ?? "Drive Easy. Your Ride, Your Rules."
+        : "Yol Senin, Kurallar Senin.";
+    var sliderDesc = isEnglish
+        ? activeSlider?.Description ?? "Flexible booking options, affordable prices, and reliable service make your journey easier. Enjoy full control of your travel experience."
+        : "Esnek rezervasyon seçenekleri, avantajlı fiyatlar ve güvenilir hizmetle yolculuğunuzu özgürce planlayın.";
+    var whyTitle = isEnglish ? Model.WeAreTheBest.Title : "Yolculuğunuzda güvenilir bir yol arkadaşı";
+    var whyDescription = isEnglish ? Model.WeAreTheBest.Description : "Bakımlı araçlarımız, esnek teslim seçeneklerimiz ve ulaşılabilir destek ekibimizle kiralama deneyiminizi baştan sona kolaylaştırıyoruz.";
+    var feature1Title = isEnglish ? Model.WeAreTheBest.Feature1Title : "Esnek Teslim ve İade";
+    var feature1Description = isEnglish ? Model.WeAreTheBest.Feature1Description : "Aracınızı size en uygun Carola noktasından teslim alın ve yolculuğunuzu özgürce planlayın.";
+    var feature2Title = isEnglish ? Model.WeAreTheBest.Feature2Title : "7/24 Yol Desteği";
+    var feature2Description = isEnglish ? Model.WeAreTheBest.Feature2Description : "Nerede olursanız olun, destek ekibimiz yolculuğunuz boyunca yanınızda.";
+    var sliderImg = string.IsNullOrWhiteSpace(activeSlider?.ImageUrl) || activeSlider.ImageUrl.StartsWith("/carola")
+        ? "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=85&w=1920"
+        : activeSlider.ImageUrl;
+}
+
+<!-- Hero Slider Section -->
+<div class="hero-slider" style="background-image: url('@sliderImg');">
+    <div class="container">
+        <div class="hero-content">
+            <span class="hero-badge">@T.Translate("Araç Kiralama", "Car Rental")</span>
+            <h1 class="hero-title">@sliderTitle</h1>
+            <p class="hero-desc">@sliderDesc</p>
+            <a href="#featured-cars" class="btn btn-primary btn-primary-custom">@T.Translate("Araçları Keşfet", "Explore Cars") <i class="bi bi-arrow-down-circle"></i></a>
+        </div>
+    </div>
+</div>
+
+<!-- Search Widget Overlay Section -->
+<div class="search-widget-container">
+    <div class="container">
+        <form class="search-widget" method="GET" action="@Url.Action("CarList", "Car")">
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <label class="search-widget-label">@T.Translate("Alış Şubesi", "Pick-up Branch")</label>
+                    <div class="search-widget-input-wrapper">
+                        <i class="bi bi-geo-alt"></i>
+                        <select name="locationId" class="search-widget-input" required>
+                            <option value="">@T.Translate("-- Şube Seç --", "-- Select Branch --")</option>
+                            @foreach (var branch in Model.Branches)
+                            {
+                                <option value="@branch.LocationId">@T.Data(branch.LocationName)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="search-widget-label">@T.Translate("Alış Tarihi", "Pick-up Date")</label>
+                    <div class="search-widget-input-wrapper">
+                        <i class="bi bi-calendar3"></i>
+                        <input type="date" name="startDate" class="search-widget-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="search-widget-label">@T.Translate("İade Tarihi", "Return Date")</label>
+                    <div class="search-widget-input-wrapper">
+                        <i class="bi bi-calendar3-event"></i>
+                        <input type="date" name="endDate" class="search-widget-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="search-widget-label">@T.Translate("Koltuk Sayısı", "Seats")</label>
+                    <div class="search-widget-input-wrapper">
+                        <i class="bi bi-people"></i>
+                        <select name="seatCount" class="search-widget-input">
+                            <option value="">@T.Translate("Seçiniz", "Select")</option>
+                            <option value="2">2+ @T.Translate("Koltuk", "Seats")</option>
+                            <option value="4">4+ @T.Translate("Koltuk", "Seats")</option>
+                            <option value="5">5+ @T.Translate("Koltuk", "Seats")</option>
+                            <option value="7">7+ @T.Translate("Koltuk", "Seats")</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-primary-custom w-100 d-flex align-items-center justify-content-center" style="height: 45px;">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Explore Car Types (Categories) Section -->
+<section class="py-5" style="margin-top: 50px;">
+    <div class="container">
+        <div class="section-subtitle">@T.Translate("Araç Tipleri", "Vehicle Types")</div>
+        <h2 class="section-title">@T.Translate("Araç Tiplerini Keşfedin", "Explore Vehicle Types")</h2>
+
+        <div class="category-tab-container">
+            @foreach (var cat in Model.Categories)
+            {
+                // Assign beautiful placeholder car icons for categories
+                string catImg = cat.CategoryName switch
+                {
+                    "SUV" => "https://i.ibb.co/tCg3vC9/suv.png",
+                    "Sedan" => "https://i.ibb.co/X8y7Wqg/sedan.png",
+                    "Truck" => "https://i.ibb.co/P4H6Hvw/truck.png",
+                    "Spor" => "https://i.ibb.co/5KnQszT/sport.png",
+                    _ => "https://i.ibb.co/8Y7Yx3Y/eco.png"
+                };
+
+                <a href="@Url.Action("CarList", "Car", new { categoryId = cat.CarCategoryId })" class="category-tab-item text-decoration-none">
+                    <img src="@catImg" class="category-tab-image" alt="@T.Data(cat.CategoryName)" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                    <span class="category-tab-label">@T.Data(cat.CategoryName)</span>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- We Are The Best Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0 text-start">
+                <div class="section-subtitle text-start">@T.Translate("Neden Carola?", "Why Carola?")</div>
+                <h2 class="section-title text-start mb-3">@whyTitle</h2>
+                <p class="text-muted mb-4">@whyDescription</p>
+                <a href="@Url.Action("CarList", "Car")" class="btn btn-primary btn-primary-custom">@T.Translate("Araçlarımızı Gör", "View Our Fleet") <i class="bi bi-arrow-right-short"></i></a>
+            </div>
+            <div class="col-lg-7">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="best-card">
+                            <div class="best-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                            <h3 class="best-title">@feature1Title</h3>
+                            <p class="best-desc">@feature1Description</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="best-card">
+                            <div class="best-icon"><i class="bi bi-shield-check"></i></div>
+                            <h3 class="best-title">@feature2Title</h3>
+                            <p class="best-desc">@feature2Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Son 6 Araç Section -->
+<section class="py-5" id="featured-cars">
+    <div class="container">
+        <div class="section-subtitle">@T.Translate("Öne Çıkan Araçlar", "Featured Vehicles")</div>
+        <h2 class="section-title">@T.Translate("En Son Eklenen Kiralık Araçlar", "Latest Rental Cars")</h2>
+
+        <div class="row g-4">
+            @foreach (var car in Model.LatestCars)
+            {
+                var brandName = Model.Brands.FirstOrDefault(b => b.BrandId == car.BrandId)?.BrandName ?? "Car";
+                // Premium car image fallback using Unsplash
+                string carImage = car.ImageUrl;
+                if (string.IsNullOrEmpty(carImage) || carImage.StartsWith("/carola"))
+                {
+                    carImage = car.Model switch
+                    {
+                        "320i" => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600",
+                        "C180" => "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600",
+                        "Clio" => "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600",
+                        "911 Carrera" => "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
+                        "Corolla" => "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600",
+                        "C 200" => "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=600",
+                        "Hilux" => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600",
+                        _ => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600"
+                    };
+                }
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="car-card">
+                        <div class="car-card-img-wrapper">
+                            <img src="@carImage" class="car-card-img" alt="@brandName @car.Model" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                            <div class="car-card-badge"><i class="bi bi-star-fill"></i> 4.8</div>
+                        </div>
+                        <div class="car-card-body text-start">
+                            <h3 class="car-card-title">@brandName @car.Model</h3>
+                            <div class="car-card-price-row">
+                                <span class="car-card-price">₺@car.DailyPrice.ToString("N0")</span>
+                            <span class="car-card-price-period">/ @T.Translate("Günlük", "Day")</span>
+                            </div>
+                            <div class="car-card-specs">
+                                <div class="car-card-spec-item"><i class="bi bi-fuel-pump"></i> @T.Data(car.FuelType)</div>
+                                <div class="car-card-spec-item"><i class="bi bi-speedometer2"></i> @car.Mileage.ToString("N0") km</div>
+                                <div class="car-card-spec-item"><i class="bi bi-people"></i> @car.SeatCount @T.Translate("Kişilik", "Seats")</div>
+                                <div class="car-card-spec-item"><i class="bi bi-gear"></i> @T.Data(car.TransmissionType)</div>
+                            </div>
+                            @if (car.IsAvailable)
+                            {
+                                <a href="@Url.Action("Index", "Booking", new { carId = car.CarId })" class="car-card-btn text-decoration-none">@T.Translate("Hemen Kirala", "Rent Now")</a>
+                            }
+                            else
+                            {
+                                <span class="car-card-btn text-decoration-none opacity-50" aria-disabled="true">@T.Translate("Geçici Olarak Müsait Değil", "Temporarily Unavailable")</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Brands Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-subtitle">@T.Translate("Markalar", "Brands")</div>
+        <h2 class="section-title">@T.Translate("Seçkin Markaları Keşfedin", "Explore Premium Brands")</h2>
+
+        <div class="brand-grid">
+            @foreach (var brand in Model.Brands)
+            {
+                <a href="@Url.Action("CarList", "Car", new { brandId = brand.BrandId })" class="brand-logo-card">
+                    <span class="brand-wordmark">@brand.BrandName</span>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Places We Serve Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-subtitle">@T.Translate("Hizmet Noktaları", "Service Locations")</div>
+        <h2 class="section-title">@T.Translate("Hizmet Verdiğimiz Popüler Şubeler", "Top Places We Serve")</h2>
+
+        <div class="row">
+            @foreach (var branch in Model.Branches)
+            {
+                // Fallback photos for branch locations
+                string branchImg = branch.LocationName.ToLower() switch
+                {
+                    var x when x.Contains("istanbul") => "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&q=80&w=400",
+                    var x when x.Contains("konyaaltı") => "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=400",
+                    var x when x.Contains("izmir") => "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&q=80&w=400",
+                    _ => "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400"
+                };
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="place-card">
+                        <img src="@branchImg" class="place-card-img" alt="@T.Data(branch.LocationName)" />
+                        <div class="place-card-overlay">
+                            <h3 class="place-card-title">@T.Data(branch.LocationName)</h3>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,29 @@
+@model Carola.WebUI.Models.ReservationConfirmationViewModel
+@{
+    ViewData["Title"] = T.Translate("Rezervasyon Durumu", "Reservation Status");
+}
+
+<section class="reservation-page">
+    <div class="container reservation-page-inner">
+        <partial name="_ReservationStatusCard" model="Model" />
+        <div class="reservation-page-actions">
+            <a href="/" class="btn btn-primary-custom"><i class="bi bi-house"></i> @T.Translate("Ana Sayfaya Dön", "Back to Home")</a>
+            <a href="/Car/CarList" class="btn btn-outline-secondary"><i class="bi bi-car-front"></i> @T.Translate("Diğer Araçları İncele", "Explore Other Cars")</a>
+            <button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> @T.Translate("Yazdır", "Print")</button>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @if (Model.Reservation.Status == "Bekliyor")
+    {
+        <script>
+            window.setInterval(async () => {
+                const response = await fetch('/Booking/Status?id=@Model.Reservation.ReservationId');
+                if (!response.ok) return;
+                const result = await response.json();
+                if (result.status !== 'Bekliyor') window.location.reload();
+            }, 10000);
+        </script>
+    }
+}

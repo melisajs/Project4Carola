@@ -1,0 +1,172 @@
+@model List<CarolaEnditiyLayer.Entities.Slider>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Slider Yönetimi";
+}
+
+<section class="hero glass text-start">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="hero-breadcrumb">
+                <i class="bi bi-images"></i>
+                Site Yönetimi / Slider Banners
+            </span>
+            <h1>Ana sayfa slider alanlarını yönetin</h1>
+            <p>Web sitesinin en üstünde yer alan tanıtım afişlerini ve başlıklarını buradan değiştirebilirsiniz.</p>
+        </div>
+        <button class="btn btn-accent px-4 py-2" data-bs-toggle="modal" data-bs-target="#addSliderModal">
+            <i class="bi bi-plus-lg"></i> Yeni Slider Ekle
+        </button>
+    </div>
+</section>
+
+<!-- Sliders List Table -->
+<div class="card glass p-4 border-0 text-start">
+    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-card-image"></i> Slider Listesi</h3>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Görsel</th>
+                    <th>Başlık</th>
+                    <th>Açıklama</th>
+                    <th>Durum</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">Kayıtlı slider bulunmamaktadır.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var slide in Model)
+                    {
+                        string statusText = slide.Status ? "Aktif" : "Pasif";
+                        string statusBadge = slide.Status ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger";
+                        string slideImg = slide.ImageUrl;
+                        if (string.IsNullOrEmpty(slideImg) || slideImg.StartsWith("/carola"))
+                        {
+                            slideImg = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=300";
+                        }
+
+                        <tr>
+                            <td>
+                                <img src="@slideImg" alt="@slide.Title" class="admin-thumb" style="width:88px;" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                            </td>
+                            <td><strong class="text-white">@slide.Title</strong></td>
+                            <td style="max-width: 300px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">@slide.Description</td>
+                            <td>
+                                <span class="badge @statusBadge">@statusText</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-light btn-sm me-2 edit-slide-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editSliderModal"
+                                        data-id="@slide.SliderId"
+                                        data-title="@slide.Title"
+                                        data-desc="@slide.Description"
+                                        data-img="@slide.ImageUrl"
+                                        data-status="@slide.Status.ToString().ToLower()">
+                                    Düzenle
+                                </button>
+                                <a href="@Url.Action("Delete", "AdminSlider", new { id = slide.SliderId })" class="btn btn-danger-soft btn-sm" onclick="return confirm('Bu sliderı silmek istediğinize emin misiniz?')">Sil</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Slider Modal -->
+<div class="modal fade" id="addSliderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Yeni Slider Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Create", "AdminSlider")">
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Başlık *</label>
+                        <input type="text" name="Title" class="form-control" placeholder="Örn: Drive Easy. Your Ride, Your Rules." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama *</label>
+                        <textarea name="Description" class="form-control" rows="3" placeholder="Açıklama metni..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Afiş Görsel URL *</label>
+                        <input type="text" name="ImageUrl" class="form-control" placeholder="https://..." required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Slider Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Slider Modal -->
+<div class="modal fade" id="editSliderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass border border-secondary border-opacity-25" style="background-color: var(--bg-2);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4">
+                <h5 class="modal-title font-weight-bold text-white">Slider Düzenle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="@Url.Action("Edit", "AdminSlider")">
+                <input type="hidden" name="SliderId" id="editSliderId" />
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Başlık *</label>
+                        <input type="text" name="Title" id="editTitle" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama *</label>
+                        <textarea name="Description" id="editDescription" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Afiş Görsel URL *</label>
+                        <input type="text" name="ImageUrl" id="editImageUrl" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Durum *</label>
+                        <select name="Status" id="editStatus" class="form-select">
+                            <option value="true">Aktif</option>
+                            <option value="false">Pasif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-accent">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editSlideBtns = document.querySelectorAll('.edit-slide-btn');
+        editSlideBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editSliderId').value = btn.dataset.id;
+                document.getElementById('editTitle').value = btn.dataset.title;
+                document.getElementById('editDescription').value = btn.dataset.desc;
+                document.getElementById('editImageUrl').value = btn.dataset.img;
+                document.getElementById('editStatus').value = btn.dataset.status;
+            });
+        });
+    </script>
+}

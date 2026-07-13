@@ -1,0 +1,28 @@
+@model Carola.WebUI.Models.ReservationTrackViewModel
+@{
+    ViewData["Title"] = T.Translate("Rezervasyon Sorgula", "Track Reservation");
+}
+
+<section class="reservation-page">
+    <div class="container reservation-page-inner">
+        <div class="reservation-track-card">
+            <span class="section-subtitle">@T.Translate("REZERVASYON TAKİBİ", "RESERVATION TRACKING")</span>
+            <h1>@T.Translate("Rezervasyonunuzu Sorgulayın", "Track Your Reservation")</h1>
+            <p>@T.Translate("Rezervasyon kodunuzu ve rezervasyonda kullandığınız e-posta adresini girin.", "Enter your reservation code and the email used during booking.")</p>
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+            <form method="post" class="reservation-track-form">
+                <div><label asp-for="ReservationCode">@T.Translate("Rezervasyon Kodu", "Reservation Code")</label><input asp-for="ReservationCode" class="form-control" placeholder="CAR-000001" required /></div>
+                <div><label asp-for="Email">@T.Translate("E-posta", "Email")</label><input asp-for="Email" class="form-control" type="email" placeholder="ornek@mail.com" required /></div>
+                <button type="submit" class="btn btn-primary-custom"><i class="bi bi-search"></i> @T.Translate("Rezervasyonu Sorgula", "Track Reservation")</button>
+            </form>
+        </div>
+
+        @if (Model.Result != null)
+        {
+            <partial name="_ReservationStatusCard" model="Model.Result" />
+        }
+    </div>
+</section>

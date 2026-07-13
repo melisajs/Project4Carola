@@ -1,0 +1,7 @@
+.vs/
+**/bin/
+**/obj/
+*.user
+*.log
+Carola.WebUI/wwwroot/sent-emails/
+Carola.WebUI/App_Data/contact-messages/

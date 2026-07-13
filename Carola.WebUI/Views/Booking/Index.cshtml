@@ -1,0 +1,427 @@
+@model Carola.WebUI.Models.BookingViewModel
+@{
+    ViewData["Title"] = T.Translate("Rezervasyon Oluştur", "Create Reservation");
+    var brandName = Model.Brand?.BrandName ?? "Car";
+    string carImage = Model.Car.ImageUrl;
+    if (string.IsNullOrEmpty(carImage) || carImage.StartsWith("/carola"))
+    {
+        carImage = Model.Car.Model switch
+        {
+            "320i" => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600",
+            "C180" => "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600",
+            "Clio" => "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600",
+            "911 Carrera" => "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
+            "Corolla" => "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600",
+            "C 200" => "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=600",
+            "Hilux" => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600",
+            _ => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600"
+        };
+    }
+}
+
+<!-- Page Header Navigation crumbs -->
+<div class="bg-light py-3 border-bottom">
+    <div class="container text-start">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb m-0" style="font-size: 13px;">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@T.Translate("Ana Sayfa", "Home")</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Car" asp-action="CarList">@T.Translate("Araçlar", "Vehicles")</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@T.Translate("Rezervasyon Oluştur", "Create Reservation")</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        
+        @if (Model.IsSuccess)
+        {
+            <div class="card shadow border-0 p-5 text-center bg-white rounded-4">
+                <div><i class="bi bi-check-circle-fill text-success" style="font-size: 72px;"></i></div>
+                <h2 class="mt-4 font-weight-bold">@T.Translate("Rezervasyon Talebiniz Alındı!", "Reservation Request Received!")</h2>
+                <p class="text-muted fs-5 mt-2">
+                    @T.Translate("Talebiniz başarıyla kaydedildi ve onay sürecine alındı.", "Your request was saved and is now pending approval.")
+                </p>
+                <p class="text-muted">
+                    @T.Translate("Yöneticilerimiz talebi onayladığında detaylar e-posta adresinize gönderilecektir.", "Details will be emailed to you after approval.")
+                </p>
+                <div class="mt-4">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-primary-custom px-5">@T.Translate("Ana Sayfaya Dön", "Back to Home")</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <form method="POST" action="@Url.Action("Index", "Booking")" id="bookingForm">
+                <input type="hidden" asp-for="CarId" />
+                <input type="hidden" asp-for="OcrVerified" id="ocrVerified" />
+                <input type="hidden" asp-for="OcrRawText" id="ocrRawText" />
+
+                <!-- Title & Back Button -->
+                <div class="d-flex align-items-center gap-3 mb-4 text-start">
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h2 class="m-0 font-weight-bold" style="font-size: 24px;">@T.Translate("Rezervasyon Oluştur", "Create Reservation")</h2>
+                        <p class="text-muted m-0" style="font-size: 13px;">@T.Translate("Bilgileri doldurun ve rezervasyonunuzu tamamlayın", "Complete the steps below to submit your reservation")</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    
+                    <!-- Left: Form Steps -->
+                    <div class="col-lg-8 text-start">
+                        
+                        <!-- Danger Alert Box for date conflicts -->
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert-reservation-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span>@Model.ErrorMessage</span>
+                            </div>
+                        }
+
+                        <!-- Step 1: Tarih & Şube -->
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                                <h3 class="m-0 font-weight-bold fs-5" style="color: #0c1729;">
+                                    <span class="badge bg-primary me-2">1</span> @T.Translate("Tarih ve Şube", "Dates & Branches")
+                                </h3>
+                                <span class="text-muted" style="font-size: 12px;">@T.Translate("Alış ve iade bilgileri", "Pick-up and return details")</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("ALIŞ TARİHİ", "PICK-UP DATE") *</label>
+                                    <input type="date" asp-for="PickupDate" id="pickupDate" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="calculateDates()" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("İADE TARİHİ", "RETURN DATE") *</label>
+                                    <input type="date" asp-for="ReturnDate" id="returnDate" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="calculateDates()" />
+                                </div>
+
+                                <!-- Real-time Success Availability Alert -->
+                                <div class="col-12" id="availabilityMessage" style="display: @(string.IsNullOrEmpty(Model.ErrorMessage) ? "block" : "none")">
+                                    <div class="alert alert-success d-flex align-items-center gap-2 m-0 py-2 px-3" style="font-size: 13px;">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>@T.Translate("Bu tarihler arasında araç kiralanabilir.", "The vehicle is available for these dates.")</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("ALIŞ ŞUBESİ", "PICK-UP BRANCH") *</label>
+                                    <select asp-for="PickupLocationId" class="form-select" required>
+                                        @foreach (var loc in Model.Locations)
+                                        {
+                                            <option value="@loc.LocationId">@T.Data(loc.LocationName)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("İADE ŞUBESİ", "RETURN BRANCH") *</label>
+                                    <select asp-for="ReturnLocationId" class="form-select" required>
+                                        @foreach (var loc in Model.Locations)
+                                        {
+                                            <option value="@loc.LocationId">@T.Data(loc.LocationName)</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Sürücü Bilgileri (with Tesseract.js OCR) -->
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                                <h3 class="m-0 font-weight-bold fs-5" style="color: #0c1729;">
+                                    <span class="badge bg-primary me-2">2</span> @T.Translate("Sürücü Bilgileri", "Driver Information")
+                                </h3>
+                                <span class="text-muted" style="font-size: 12px;">@T.Translate("Kimlik ve ehliyet", "Identity and driving licence")</span>
+                            </div>
+
+                            <!-- OCR Scan Panel -->
+                            <div class="ocr-preview-box" id="ocrDropzone">
+                                <i class="bi bi-camera-fill text-primary" style="font-size: 32px;"></i>
+                                <div class="font-weight-bold mt-2">@T.Translate("Ehliyet / Kimlik Görseli Yükle", "Upload Driving Licence / ID Image")</div>
+                                <p class="text-muted m-0" style="font-size: 12px;">@T.Translate("Kimlik bilgileriniz OCR ile otomatik doldurulur; manuel giriş yapılamaz.", "Identity fields are filled automatically by OCR and cannot be entered manually.")</p>
+                                <input type="file" id="ocrFileInput" accept="image/*" style="display: none;" />
+                                
+                                <div id="ocrLoader" class="mt-3" style="display: none;">
+                                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                    <span class="ms-2 font-weight-bold text-primary" style="font-size: 13px;" id="ocrStatusText">@T.Translate("Görsel okunuyor...", "Reading image...")</span>
+                                </div>
+
+                                <img id="uploadedImagePreview" class="ocr-preview-image" style="display: none;" />
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("AD", "FIRST NAME") *</label>
+                                    <input type="text" asp-for="FirstName" id="firstName" class="form-control" required readonly placeholder="@T.Translate("Ehliyet okutularak otomatik doldurulur", "Filled automatically after scanning")" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("SOYAD", "LAST NAME") *</label>
+                                    <input type="text" asp-for="LastName" id="lastName" class="form-control" required readonly placeholder="@T.Translate("Ehliyet okutularak otomatik doldurulur", "Filled automatically after scanning")" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("E-POSTA", "EMAIL") *</label>
+                                    <input type="email" asp-for="Email" class="form-control" required placeholder="ornek@mail.com" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("TELEFON", "PHONE") *</label>
+                                    <input type="tel" asp-for="Phone" class="form-control" required placeholder="+90 5xx xxx xx xx" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("DOĞUM TARİHİ", "DATE OF BIRTH") *</label>
+                                    <input type="date" asp-for="BirthDate" id="birthDate" class="form-control" required readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET SINIFI", "LICENCE CLASS") *</label>
+                                    <input type="text" asp-for="LicenseClass" id="licenseClass" class="form-control" required readonly placeholder="@T.Translate("Otomatik doldurulur", "Filled automatically")" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET NUMARASI", "LICENCE NUMBER") *</label>
+                                    <input type="text" asp-for="DriverLicenseNumber" id="licenseNumber" class="form-control" required readonly placeholder="@T.Translate("Otomatik doldurulur", "Filled automatically")" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET VERİLİŞ TARİHİ", "LICENCE ISSUE DATE") *</label>
+                                    <input type="date" asp-for="LicenseIssueDate" id="licenseIssueDate" class="form-control" required readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Ek Notlar -->
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                                <h3 class="m-0 font-weight-bold fs-5" style="color: #0c1729;">
+                                    <span class="badge bg-primary me-2">3</span> @T.Translate("Ek Notlar", "Additional Notes")
+                                </h3>
+                                <span class="text-muted" style="font-size: 12px;">@T.Translate("Özel talepler", "Special requests")</span>
+                            </div>
+                            <div>
+                                <textarea asp-for="AdditionalNotes" class="form-control" rows="3" placeholder="@T.Translate("Bebek koltuğu, GPS, erken teslim alma vb. taleplerinizi yazabilirsiniz...", "Add requests such as a child seat, GPS or early pick-up...")"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: Booking invoice summary -->
+                    <div class="col-lg-4 mt-4 mt-lg-0">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white position-sticky" style="top: 20px;">
+                            
+                            <!-- Mini Vehicle Card -->
+                            <div class="text-center bg-light p-3 rounded-4 mb-3">
+                                <img src="@carImage" alt="@brandName @Model.Car.Model" class="img-fluid" style="max-height: 120px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                            </div>
+
+                            <div class="text-start">
+                                <span class="badge bg-danger-subtle text-danger mb-2 font-weight-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">@T.Data(Model.Car.FuelType)</span>
+                                <h4 class="font-weight-bold m-0" style="color: #0c1729;">@brandName @Model.Car.Model</h4>
+                                
+                                <div class="d-flex gap-3 text-muted mt-2" style="font-size: 13px;">
+                                    <span><i class="bi bi-people-fill text-primary"></i> @Model.Car.SeatCount @T.Translate("Kişilik", "Seats")</span>
+                                    <span><i class="bi bi-gear-fill text-primary"></i> @T.Data(Model.Car.TransmissionType)</span>
+                                    <span><i class="bi bi-snow2 text-primary"></i> @T.Translate("Klima", "A/C")</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between border-bottom pb-3 mt-4 mb-3">
+                                    <span class="text-muted" style="font-size: 14px;">@T.Translate("Günlük Ücret", "Daily Rate")</span>
+                                    <strong class="fs-5 text-primary">₺@Model.Car.DailyPrice.ToString("N0")</strong>
+                                </div>
+
+                                <!-- Fiyat Özeti -->
+                                <div class="bg-light p-3 rounded-3 mb-4">
+                                    <div class="d-flex justify-content-between mb-2" style="font-size: 13px;">
+                                        <span class="text-muted">@T.Translate("Günlük ücret:", "Daily rate:")</span>
+                                        <span class="font-weight-bold">₺@Model.Car.DailyPrice.ToString("N0")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2" style="font-size: 13px;">
+                                        <span class="text-muted">@T.Translate("Süre:", "Duration:")</span>
+                                        <span class="font-weight-bold" id="invoiceDays">@Model.RentalDays @T.Translate("Gün", "Days")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-top pt-2" style="font-size: 15px;">
+                                        <span class="font-weight-bold">@T.Translate("Toplam:", "Total:")</span>
+                                        <strong class="text-primary font-weight-bold" id="invoiceTotal">₺@Model.TotalPrice.ToString("N0")</strong>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-primary-custom w-100 py-3 d-flex align-items-center justify-content-center gap-2 font-weight-bold">
+                                    <i class="bi bi-check-circle-fill"></i> @T.Translate("Rezervasyonu Tamamla", "Submit Reservation")
+                                </button>
+                                
+                                <div class="text-center text-muted mt-3" style="font-size: 11px;">
+                                    <i class="bi bi-shield-lock-fill text-success"></i> @T.Translate("Ödeme teslimat sırasında - 24 saat öncesine kadar ücretsiz iptal.", "Payment at pick-up - Free cancellation up to 24 hours before.")
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        }
+
+    </div>
+</section>
+
+<!-- Scripts -->
+@section Scripts {
+    <!-- Tesseract.js CDN for client-side OCR -->
+    <script src="/ocr/tesseract.min.js"></script>
+
+    <script>
+        const dailyPrice = @Model.Car.DailyPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const carId = @Model.CarId;
+        const bookingText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            day = T.Translate("Gün", "Days"),
+            scanComplete = T.Translate("Tarama tamamlandı. Tüm bilgiler görselden otomatik dolduruldu.", "Scan complete. All fields were filled from the image."),
+            scanPartial = T.Translate("Bazı alanlar okunamadı. Lütfen daha net ve düz çekilmiş bir görsel yükleyin.", "Some fields could not be read. Upload a clearer, straight image."),
+            scanning = T.Translate("Kimlik/Ehliyet taranıyor...", "Scanning ID/Driving licence..."),
+            scanningProgress = T.Translate("Kimlik taranıyor...", "Scanning ID..."),
+            scanFailed = T.Translate("Görsel okunamadı. Lütfen internet bağlantınızı ve görsel kalitesini kontrol edin.", "The image could not be read. Check your connection and image quality.")
+        }));
+
+        // Dynamic price calculation
+        async function calculateDates() {
+            const startVal = document.getElementById('pickupDate').value;
+            const endVal = document.getElementById('returnDate').value;
+            
+            if (startVal && endVal) {
+                const start = new Date(startVal);
+                const end = new Date(endVal);
+                
+                const timeDiff = end.getTime() - start.getTime();
+                let days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                if (days <= 0) days = 1;
+                
+                const total = dailyPrice * days;
+                
+                document.getElementById('invoiceDays').innerText = days + " " + bookingText.day;
+                document.getElementById('invoiceTotal').innerText = "₺" + total.toLocaleString('tr-TR');
+
+                const availabilityBox = document.getElementById('availabilityMessage');
+                const response = await fetch(`/Booking/CheckAvailability?carId=${carId}&pickupDate=${startVal}&returnDate=${endVal}`);
+                const result = await response.json();
+                availabilityBox.style.display = 'block';
+                availabilityBox.innerHTML = `<div class="alert ${result.available ? 'alert-success' : 'alert-danger'} d-flex align-items-center gap-2 m-0 py-2 px-3" style="font-size:13px"><i class="bi ${result.available ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i><span>${result.message}</span></div>`;
+            }
+        }
+
+        // Trigger file input clicking on dropzone click
+        const ocrDropzone = document.getElementById('ocrDropzone');
+        const ocrFileInput = document.getElementById('ocrFileInput');
+        const ocrLoader = document.getElementById('ocrLoader');
+        const ocrStatusText = document.getElementById('ocrStatusText');
+        const uploadedImagePreview = document.getElementById('uploadedImagePreview');
+
+        ocrDropzone.addEventListener('click', () => {
+            ocrFileInput.click();
+        });
+
+        function normalizeOcrText(value) {
+            return value
+                .replace(/\r/g, '\n')
+                .replace(/[|]/g, 'I')
+                .replace(/[ \t]+/g, ' ')
+                .toLocaleUpperCase('tr-TR');
+        }
+
+        function matchValue(text, patterns) {
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match?.[1]) return match[1].trim();
+            }
+            return '';
+        }
+
+        function toIsoDate(value) {
+            const match = value?.match(/(\d{2})[.\/-](\d{2})[.\/-](\d{4})/);
+            return match ? `${match[3]}-${match[2]}-${match[1]}` : '';
+        }
+
+        function parseIdentity(text) {
+            const normalized = normalizeOcrText(text);
+            const surname = matchValue(normalized, [/(?:^|\n)\s*(?:1\.?\s*)?SOYADI?\s*[:\-]?\s*([A-ZÇĞİÖŞÜ ]{2,40})/m, /SURNAME\s*[:\-]?\s*([A-ZÇĞİÖŞÜ ]{2,40})/]);
+            const firstName = matchValue(normalized, [/(?:^|\n)\s*(?:2\.?\s*)?(?:ADI|AD)\s*[:\-]?\s*([A-ZÇĞİÖŞÜ ]{2,40})/m, /GIVEN NAMES?\s*[:\-]?\s*([A-ZÇĞİÖŞÜ ]{2,40})/]);
+            const birthDate = matchValue(normalized, [/(?:3\.?\s*)?(?:DOĞUM TARİHİ|DATE OF BIRTH)\s*[:\-]?\s*(\d{2}[.\/-]\d{2}[.\/-]\d{4})/]);
+            const issueDate = matchValue(normalized, [/(?:4A\.?\s*)?(?:VERİLİŞ TARİHİ|DÜZENLEME TARİHİ|DATE OF ISSUE)\s*[:\-]?\s*(\d{2}[.\/-]\d{2}[.\/-]\d{4})/]);
+            const licenseClass = matchValue(normalized, [/(?:9\.?\s*)?(?:SINIFI|SINIF|CATEGORIES)\s*[:\-]?\s*([A-Z0-9, ]{1,15})/]);
+            const licenseNumber = matchValue(normalized, [/(?:5\.?\s*)?(?:BELGE NO|EHLİYET NO|DRIVING LICENCE NO)\s*[:\-]?\s*([A-Z0-9\-]{5,20})/]);
+
+            return {
+                firstName: firstName.replace(/\s+(SOYADI|SURNAME).*$/, '').trim(),
+                surname: surname.replace(/\s+(ADI|GIVEN).*$/, '').trim(),
+                birthDate: toIsoDate(birthDate),
+                issueDate: toIsoDate(issueDate),
+                licenseClass,
+                licenseNumber,
+                raw: normalized
+            };
+        }
+
+        function applyOcrResult(result) {
+            const complete = result.firstName && result.surname && result.birthDate && result.issueDate && result.licenseClass && result.licenseNumber;
+            document.getElementById('firstName').value = result.firstName;
+            document.getElementById('lastName').value = result.surname;
+            document.getElementById('birthDate').value = result.birthDate;
+            document.getElementById('licenseIssueDate').value = result.issueDate;
+            document.getElementById('licenseClass').value = result.licenseClass;
+            document.getElementById('licenseNumber').value = result.licenseNumber;
+            document.getElementById('ocrRawText').value = result.raw;
+            document.getElementById('ocrVerified').value = complete ? 'true' : 'false';
+            ocrStatusText.innerText = complete
+                ? bookingText.scanComplete
+                : bookingText.scanPartial;
+            ocrStatusText.className = complete ? 'ms-2 fw-bold text-success' : 'ms-2 fw-bold text-danger';
+            ocrLoader.style.display = 'block';
+            ocrLoader.querySelector('.spinner-border').style.display = 'none';
+        }
+
+        // OCR Recognition logic using Tesseract.js. No identity field is manually editable.
+        ocrFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Show uploaded image thumbnail
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    uploadedImagePreview.src = event.target.result;
+                    uploadedImagePreview.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+
+                // Show OCR spinner
+                ocrLoader.style.display = 'block';
+                ocrStatusText.innerText = bookingText.scanning;
+
+                document.getElementById('ocrVerified').value = 'false';
+                document.getElementById('ocrRawText').value = '';
+                ocrLoader.querySelector('.spinner-border').style.display = 'inline-block';
+
+                Tesseract.recognize(
+                    file,
+                    'tur+eng',
+                    { 
+                        workerPath: '/ocr/worker.min.js',
+                        corePath: '/ocr',
+                        langPath: '/ocr',
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                ocrStatusText.innerText = bookingText.scanningProgress + " %" + Math.round(m.progress * 100);
+                            }
+                        } 
+                    }
+                ).then(({ data: { text } }) => {
+                    applyOcrResult(parseIdentity(text));
+                }).catch(err => {
+                    console.error("OCR Error:", err);
+                    document.getElementById('ocrVerified').value = 'false';
+                    ocrStatusText.innerText = bookingText.scanFailed;
+                    ocrStatusText.className = 'ms-2 fw-bold text-danger';
+                    ocrLoader.querySelector('.spinner-border').style.display = 'none';
+                });
+            }
+        });
+    </script>
+}

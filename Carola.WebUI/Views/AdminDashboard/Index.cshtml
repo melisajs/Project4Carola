@@ -1,0 +1,276 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard";
+    var recentReservations = ViewBag.RecentReservations as List<Carola.WebUI.Controllers.RecentReservationDto> ?? new();
+    var locations = ViewBag.Locations as List<CarolaEnditiyLayer.Entities.Location> ?? new();
+    var cars = ViewBag.Cars as List<CarolaEnditiyLayer.Entities.Car> ?? new();
+    
+    // Category occupancy
+    int availableCarsCount = cars.Count(c => c.IsAvailable);
+    int occupiedCarsCount = cars.Count(c => !c.IsAvailable);
+}
+
+<!-- Hero Section -->
+<section class="hero glass text-start">
+    <div>
+        <span class="hero-breadcrumb">
+            <i class="bi bi-speedometer2"></i>
+            @T.Translate("Gösterge Paneli / Dashboard", "Admin Console / Dashboard")
+        </span>
+        <h1>@T.Translate("Hoş geldiniz", "Welcome") — @DateTime.Now.ToString("dd MMMM yyyy, dddd")</h1>
+        <p>
+            @T.Translate("Carola araç kiralama operasyonlarının ve envanter durumunun anlık izleme ekranı.", "Live monitoring for Carola rental operations and fleet availability.")
+        </p>
+    </div>
+</section>
+
+<!-- Summary Cards -->
+<section class="row g-4 text-start">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card glass">
+            <div class="metric-head">
+                <div>
+                    <span>@T.Translate("Toplam Araç", "Total Vehicles")</span>
+                    <strong>@ViewBag.TotalCars</strong>
+                </div>
+                <div class="metric-icon">
+                    <i class="bi bi-car-front-fill"></i>
+                </div>
+            </div>
+            <p class="text-success"><i class="bi bi-arrow-up-right-short"></i> @T.Translate("Filo aktif!", "Fleet online")</p>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card glass">
+            <div class="metric-head">
+                <div>
+                    <span>@T.Translate("Toplam Rezervasyon", "Total Reservations")</span>
+                    <strong>@ViewBag.TotalReservations</strong>
+                </div>
+                <div class="metric-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+            </div>
+            <p class="text-success"><i class="bi bi-arrow-up-right-short"></i> @T.Translate("Bu ay", "This month")</p>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card glass">
+            <div class="metric-head">
+                <div>
+                    <span>@T.Translate("Kayıtlı Müşteri", "Registered Customers")</span>
+                    <strong>@ViewBag.TotalCustomers</strong>
+                </div>
+                <div class="metric-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+            <p class="text-info"><i class="bi bi-graph-up"></i> @T.Translate("Büyüyor", "Growing")</p>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card glass">
+            <div class="metric-head">
+                <div>
+                    <span>@T.Translate("Bekleyen Onay", "Pending Approval")</span>
+                    <strong class="@(ViewBag.PendingReservationsCount > 0 ? "text-warning" : "")">@ViewBag.PendingReservationsCount</strong>
+                </div>
+                <div class="metric-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+            <p class="text-warning"><i class="bi bi-exclamation-circle"></i> @T.Translate("İşlem gerekli", "Action required")</p>
+        </div>
+    </div>
+</section>
+
+<!-- Analytics & Branches Section -->
+<section class="row g-4 text-start">
+    
+    <!-- Monthly Income Overview -->
+    <div class="col-lg-8">
+        <div class="card glass p-4 h-100 border-0">
+            <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-currency-dollar text-primary"></i> @T.Translate("Aylık Gelir Özeti", "Monthly Revenue")</h3>
+            
+            <div class="mb-4">
+                <span class="text-muted fs-6 d-block">@T.Translate("Bu ay toplam gelir", "Total revenue this month")</span>
+                <strong class="display-5 font-weight-bold text-success">₺@ViewBag.MonthlyRevenue.ToString("N0")</strong>
+                <span class="badge bg-success-subtle text-success ms-2 font-weight-bold"><i class="bi bi-arrow-up"></i> +%12</span>
+            </div>
+
+            <!-- Beautiful visual bar representation of monthly sales -->
+            <div class="d-flex align-items-end justify-content-between px-3 mt-5" style="height: 150px;">
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-secondary opacity-25 rounded-top" style="height: 40px; width: 30px; margin: 0 auto;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2025-11</span>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-secondary opacity-25 rounded-top" style="height: 55px; width: 30px; margin: 0 auto;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2025-12</span>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-primary-subtle rounded-top" style="height: 90px; width: 30px; margin: 0 auto; background-color: rgba(115, 134, 255, 0.42) !important;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2026-01</span>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-secondary opacity-25 rounded-top" style="height: 20px; width: 30px; margin: 0 auto;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2026-02</span>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-primary-subtle rounded-top" style="height: 70px; width: 30px; margin: 0 auto; background-color: rgba(115, 134, 255, 0.42) !important;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2026-03</span>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                    <div class="bg-primary rounded-top" style="height: 120px; width: 30px; margin: 0 auto; background: linear-gradient(180deg,#29d3d0,#7386ff) !important;"></div>
+                    <span class="text-muted d-block mt-2" style="font-size: 11px;">2026-04</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Branches Stats -->
+    <div class="col-lg-4">
+        <div class="card glass p-4 h-100 border-0">
+            <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-geo-alt-fill text-primary"></i> @T.Translate("Şubeler", "Branches")</h3>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var loc in locations)
+                {
+                    // Count cars in this location
+                    int carCount = cars.Count(c => c.LocationId == loc.LocationId);
+                    string code = loc.LocationName.Substring(0, 3).ToUpper();
+
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background-color: rgba(13, 22, 37, 0.5); border: 1px solid var(--line);">
+                        <div>
+                            <strong class="text-primary font-weight-bold d-block">@code</strong>
+                            <span class="text-white-50" style="font-size: 12px;">@loc.LocationName</span>
+                        </div>
+                        <span class="badge bg-secondary font-weight-bold">@carCount @T.Translate("Araç", "Cars")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!-- Recent Bookings and Fleet status -->
+<section class="row g-4 text-start">
+    
+    <!-- Recent Bookings Table -->
+    <div class="col-lg-8">
+        <div class="card glass p-4 border-0">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fs-5 font-weight-bold m-0" style="color: #fff;"><i class="bi bi-list-stars text-primary"></i> @T.Translate("Son Rezervasyonlar", "Recent Reservations")</h3>
+                <a asp-controller="AdminReservation" asp-action="Index" class="btn btn-outline-light btn-sm rounded-pill px-3" style="font-size: 12px;">@T.Translate("Tümünü Gör", "View All")</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>@T.Translate("Müşteri", "Customer")</th>
+                            <th>@T.Translate("Araç", "Vehicle")</th>
+                            <th>@T.Translate("Tarih Aralığı", "Date Range")</th>
+                            <th>@T.Translate("Durum", "Status")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentReservations.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">@T.Translate("Kayıtlı rezervasyon bulunmamaktadır.", "No reservations found.")</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var res in recentReservations)
+                            {
+                                string statusClass = res.Reservation.Status switch
+                                {
+                                    "Onaylandı" => "bg-success-subtle text-success",
+                                    "İptal" => "bg-danger-subtle text-danger",
+                                    _ => "bg-warning-subtle text-warning"
+                                };
+
+                                <tr>
+                                    <td>
+                                        <strong class="d-block text-white">@res.CustomerName</strong>
+                                    </td>
+                                    <td><div class="d-flex align-items-center gap-2"><img src="@Carola.WebUI.Services.VehicleImageHelper.Resolve(res.CarImage, res.CarModel)" alt="@res.CarModel" class="admin-thumb" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" /><strong class="text-white">@res.CarModel</strong></div></td>
+                                    <td>@res.Reservation.PickupDate.ToString("dd.MM.yyyy") / @res.Reservation.ReturnDate.ToString("dd.MM.yyyy")</td>
+                                    <td>
+                                        <span class="badge @statusClass">@T.Translate(res.Reservation.Status, res.Reservation.Status == "Onaylandı" ? "Approved" : res.Reservation.Status == "İptal" ? "Cancelled" : "Pending")</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fleet Status breakdown -->
+    <div class="col-lg-4">
+        <div class="card glass p-4 border-0">
+            <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-pie-chart-fill text-primary"></i> @T.Translate("Filo Durumu", "Fleet Status")</h3>
+
+            <div class="d-flex justify-content-between align-items-center p-3 rounded-4 mb-4" style="background-color: rgba(13, 22, 37, 0.5); border: 1px solid var(--line);">
+                <div class="text-center w-50 border-end border-secondary border-opacity-25">
+                    <strong class="display-6 font-weight-bold text-success d-block">@availableCarsCount</strong>
+                    <span class="text-muted" style="font-size: 12px;">@T.Translate("Müsait", "Available")</span>
+                </div>
+                <div class="text-center w-50">
+                    <strong class="display-6 font-weight-bold text-warning d-block">@occupiedCarsCount</strong>
+                    <span class="text-muted" style="font-size: 12px;">@T.Translate("Bakımda / Kiralandı", "Maintenance / Rented")</span>
+                </div>
+            </div>
+
+            <!-- Categories progress bars -->
+            <label class="form-label d-block text-start mb-2 mt-4" style="font-size: 11px;">Kategoriye Göre Dağılım</label>
+            <div class="d-flex flex-column gap-3">
+                <div>
+                    <div class="d-flex justify-content-between" style="font-size: 12px;">
+                        <span>SUV</span>
+                        <span class="font-weight-bold">@cars.Count(c => c.CategoryId == 1) Araç</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 6px; background-color: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: @(cars.Count > 0 ? (cars.Count(c => c.CategoryId == 1) * 100 / cars.Count) : 0)%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between" style="font-size: 12px;">
+                        <span>Sedan</span>
+                        <span class="font-weight-bold">@cars.Count(c => c.CategoryId == 2) Araç</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 6px; background-color: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @(cars.Count > 0 ? (cars.Count(c => c.CategoryId == 2) * 100 / cars.Count) : 0)%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between" style="font-size: 12px;">
+                        <span>Truck</span>
+                        <span class="font-weight-bold">@cars.Count(c => c.CategoryId == 3) Araç</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 6px; background-color: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @(cars.Count > 0 ? (cars.Count(c => c.CategoryId == 3) * 100 / cars.Count) : 0)%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between" style="font-size: 12px;">
+                        <span>Spor</span>
+                        <span class="font-weight-bold">@cars.Count(c => c.CategoryId == 4) Araç</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 6px; background-color: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(cars.Count > 0 ? (cars.Count(c => c.CategoryId == 4) * 100 / cars.Count) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
