@@ -31,12 +31,6 @@ namespace Carola.WebUI.Services
             decimal totalPrice,
             string reservationCode)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Carola Car Rental", "noreply@carola.com"));
-            message.To.Add(new MailboxAddress(customerName, recipientEmail));
-            message.Subject = "Rezervasyonunuz Onaylandı - Özel Teklif Sizin İçin Hazır!";
-
-            var bodyBuilder = new BodyBuilder();
             var couponSvg = "<svg xmlns='http://www.w3.org/2000/svg' width='900' height='330'><defs><linearGradient id='g' x1='0' x2='1'><stop stop-color='#0c1729'/><stop offset='1' stop-color='#ff2e54'/></linearGradient></defs><rect width='900' height='330' rx='28' fill='url(#g)'/><text x='55' y='90' fill='white' font-family='Arial' font-size='34' font-weight='700'>CAROLA ÖZEL TEKLİF</text><text x='55' y='205' fill='#ffb75d' font-family='Arial' font-size='100' font-weight='800'>%30 İNDİRİM</text><text x='590' y='250' fill='white' font-family='Arial' font-size='30' font-weight='700'>KOD: CAR30</text></svg>";
             var couponDataUri = "data:image/svg+xml;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes(couponSvg));
 
@@ -234,9 +228,6 @@ namespace Carola.WebUI.Services
             </html>
             ";
 
-            bodyBuilder.HtmlBody = htmlContent;
-            message.Body = bodyBuilder.ToMessageBody();
-
             var smtpHost = _configuration["Smtp:Host"];
             var smtpUser = _configuration["Smtp:User"];
             var smtpPassword = _configuration["Smtp:Password"];
@@ -249,6 +240,12 @@ namespace Carola.WebUI.Services
                 {
                     return await SavePreviewAsync(customerName, htmlContent, "SMTP ayarları yapılandırılmadı.");
                 }
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Carola Car Rental", smtpUser));
+                message.To.Add(new MailboxAddress(customerName, recipientEmail));
+                message.Subject = "Rezervasyonunuz Onaylandı - Özel Teklif Sizin İçin Hazır!";
+                message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
 
                 using (var client = new SmtpClient())
                 {

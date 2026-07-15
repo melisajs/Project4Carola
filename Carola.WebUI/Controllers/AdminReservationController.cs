@@ -66,34 +66,46 @@ namespace Carola.WebUI.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // Persist the business operation first. Email delivery must never roll back an approval.
+                reservation.Status = "Onaylandı";
+                await _reservationService.TUpdateAsync(reservation);
+
                 // Load related details to send email
                 var customer = await _customerService.TGetByIdAsync(reservation.CustomerId);
                 var car = await _carService.TGetByIdAsync(reservation.CarId);
                 var pickupLoc = await _locationService.TGetByIdAsync(reservation.PickupLocationId);
                 var returnLoc = await _locationService.TGetByIdAsync(reservation.ReturnLocationId);
 
+                var emailPrepared = false;
                 if (customer != null && car != null)
                 {
-                    var sent = await _emailService.SendReservationApprovalEmailAsync(
-                        customer.Email,
-                        $"{customer.FirstName} {customer.LastName}",
-                        car.Model,
-                        pickupLoc?.LocationName ?? "Şube",
-                        returnLoc?.LocationName ?? "Şube",
-                        reservation.PickupDate,
-                        reservation.ReturnDate,
-                        reservation.TotalPrice,
-                        $"CAR-{reservation.ReservationId:000000}");
-
-                    if (!sent)
+                    try
                     {
-                        TempData["Error"] = "Rezervasyon onaylandı ancak teklif e-postası oluşturulamadı.";
+                        emailPrepared = await _emailService.SendReservationApprovalEmailAsync(
+                            customer.Email,
+                            $"{customer.FirstName} {customer.LastName}",
+                            car.Model,
+                            pickupLoc?.LocationName ?? "Şube",
+                            returnLoc?.LocationName ?? "Şube",
+                            reservation.PickupDate,
+                            reservation.ReturnDate,
+                            reservation.TotalPrice,
+                            $"CAR-{reservation.ReservationId:000000}");
+                    }
+                    catch
+                    {
+                        emailPrepared = false;
                     }
                 }
 
-                reservation.Status = "Onaylandı";
-                await _reservationService.TUpdateAsync(reservation);
-                TempData["Success"] = "Rezervasyon onaylandı ve teklif e-postası hazırlandı.";
+                TempData["Success"] = emailPrepared
+                    ? "Rezervasyon onaylandı ve teklif e-postası hazırlandı."
+                    : "Rezervasyon başarıyla onaylandı.";
+
+                if (!emailPrepared)
+                {
+                    TempData["Info"] = "E-posta şu anda gönderilemedi; rezervasyon onayı başarıyla kaydedildi.";
+                }
             }
             return RedirectToAction("Index");
         }
