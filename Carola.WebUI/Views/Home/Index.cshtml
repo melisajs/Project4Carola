@@ -96,14 +96,14 @@
         <div class="category-tab-container">
             @foreach (var cat in Model.Categories)
             {
-                // Assign beautiful placeholder car icons for categories
+                // Local category artwork keeps this section reliable without external image hosts.
                 string catImg = cat.CategoryName switch
                 {
-                    "SUV" => "https://i.ibb.co/tCg3vC9/suv.png",
-                    "Sedan" => "https://i.ibb.co/X8y7Wqg/sedan.png",
-                    "Truck" => "https://i.ibb.co/P4H6Hvw/truck.png",
-                    "Spor" => "https://i.ibb.co/5KnQszT/sport.png",
-                    _ => "https://i.ibb.co/8Y7Yx3Y/eco.png"
+                    "SUV" => "/images/categories/suv.svg",
+                    "Sedan" => "/images/categories/sedan.svg",
+                    "Truck" => "/images/categories/truck.svg",
+                    "Spor" => "/images/categories/sport.svg",
+                    _ => "/images/categories/economy.svg"
                 };
 
                 <a href="@Url.Action("CarList", "Car", new { categoryId = cat.CarCategoryId })" class="category-tab-item text-decoration-none">
@@ -157,22 +157,7 @@
             @foreach (var car in Model.LatestCars)
             {
                 var brandName = Model.Brands.FirstOrDefault(b => b.BrandId == car.BrandId)?.BrandName ?? "Car";
-                // Premium car image fallback using Unsplash
-                string carImage = car.ImageUrl;
-                if (string.IsNullOrEmpty(carImage) || carImage.StartsWith("/carola"))
-                {
-                    carImage = car.Model switch
-                    {
-                        "320i" => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600",
-                        "C180" => "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600",
-                        "Clio" => "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600",
-                        "911 Carrera" => "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
-                        "Corolla" => "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600",
-                        "C 200" => "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=600",
-                        "Hilux" => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600",
-                        _ => "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600"
-                    };
-                }
+                string carImage = Carola.WebUI.Services.VehicleImageHelper.Resolve(car.ImageUrl, car.Model);
 
                 <div class="col-lg-4 col-md-6">
                     <div class="car-card">
@@ -194,11 +179,11 @@
                             </div>
                             @if (car.IsAvailable)
                             {
-                                <a href="@Url.Action("Index", "Booking", new { carId = car.CarId })" class="car-card-btn text-decoration-none">@T.Translate("Hemen Kirala", "Rent Now")</a>
+                                <a href="@Url.Action("Index", "Booking", new { carId = car.CarId })" class="car-card-btn text-decoration-none"><span>@T.Translate("Hemen Kirala", "Rent Now")</span><i class="bi bi-arrow-right"></i></a>
                             }
                             else
                             {
-                                <span class="car-card-btn text-decoration-none opacity-50" aria-disabled="true">@T.Translate("Geçici Olarak Müsait Değil", "Temporarily Unavailable")</span>
+                                <span class="car-card-btn is-disabled text-decoration-none" aria-disabled="true">@T.Translate("Geçici Olarak Müsait Değil", "Temporarily Unavailable")</span>
                             }
                         </div>
                     </div>

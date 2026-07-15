@@ -7,6 +7,29 @@
     var locations = ViewBag.Locations as List<CarolaEnditiyLayer.Entities.Location> ?? new();
 }
 
+<style>
+    .fleet-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:0 0 22px; }
+    .fleet-stat-card { position:relative; overflow:hidden; min-height:126px; padding:20px; border:1px solid rgba(148,163,184,.14); border-radius:20px; background:linear-gradient(145deg,rgba(24,34,48,.96),rgba(15,23,35,.96)); box-shadow:0 18px 42px rgba(2,8,23,.16); }
+    .fleet-stat-card::after { content:""; position:absolute; width:86px; height:86px; right:-26px; top:-28px; border-radius:50%; background:var(--stat-glow,rgba(45,212,191,.16)); filter:blur(1px); }
+    .fleet-stat-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; color:var(--stat-color,#2dd4bf); background:color-mix(in srgb,var(--stat-color,#2dd4bf) 13%,transparent); font-size:19px; }
+    .fleet-stat-value { display:block; margin-top:13px; color:#f8fafc; font-size:25px; line-height:1; font-weight:800; letter-spacing:-.04em; }
+    .fleet-stat-label { display:block; margin-top:7px; color:#8fa0b7; font-size:12px; }
+    .fleet-inventory-card { border-radius:22px !important; overflow:hidden; background:linear-gradient(155deg,rgba(22,31,45,.98),rgba(13,21,32,.98)) !important; }
+    .fleet-inventory-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .fleet-inventory-title small { color:#718096; font-size:12px; font-weight:500; }
+    .fleet-row { transition:background .2s ease,transform .2s ease; }
+    .fleet-row:hover { background:rgba(45,212,191,.045); }
+    .fleet-vehicle { display:flex; align-items:center; gap:13px; min-width:210px; }
+    .fleet-vehicle .admin-thumb { width:88px; height:58px; border-radius:13px; object-fit:cover; background:#e6f3f0; border:1px solid rgba(148,163,184,.17); box-shadow:0 8px 20px rgba(0,0,0,.18); }
+    .fleet-plate { color:#d8e4e8; background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.15); padding:6px 9px; border-radius:9px; letter-spacing:.04em; }
+    .fleet-price { color:#5eead4; font-size:15px; }
+    .fleet-status { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; font-size:11px; font-weight:700; }
+    .fleet-status::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 0 4px color-mix(in srgb,currentColor 12%,transparent); }
+    .fleet-action { width:34px; height:34px; display:inline-grid; place-items:center; padding:0 !important; border-radius:10px !important; }
+    @@media (max-width:1100px) { .fleet-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @@media (max-width:620px) { .fleet-stat-grid { grid-template-columns:1fr; } }
+</style>
+
 <section class="hero glass text-start">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
@@ -23,9 +46,35 @@
     </div>
 </section>
 
+<section class="fleet-stat-grid" aria-label="Filo özeti">
+    <article class="fleet-stat-card" style="--stat-color:#38bdf8;--stat-glow:rgba(56,189,248,.16);">
+        <span class="fleet-stat-icon"><i class="bi bi-car-front-fill"></i></span>
+        <strong class="fleet-stat-value">@ViewBag.TotalCars</strong>
+        <span class="fleet-stat-label">Toplam araç</span>
+    </article>
+    <article class="fleet-stat-card" style="--stat-color:#2dd4bf;--stat-glow:rgba(45,212,191,.16);">
+        <span class="fleet-stat-icon"><i class="bi bi-check2-circle"></i></span>
+        <strong class="fleet-stat-value">@ViewBag.AvailableCars</strong>
+        <span class="fleet-stat-label">Kiralamaya hazır</span>
+    </article>
+    <article class="fleet-stat-card" style="--stat-color:#f59e0b;--stat-glow:rgba(245,158,11,.16);">
+        <span class="fleet-stat-icon"><i class="bi bi-clock-history"></i></span>
+        <strong class="fleet-stat-value">@ViewBag.UnavailableCars</strong>
+        <span class="fleet-stat-label">Kirada veya bakımda</span>
+    </article>
+    <article class="fleet-stat-card" style="--stat-color:#a78bfa;--stat-glow:rgba(167,139,250,.16);">
+        <span class="fleet-stat-icon"><i class="bi bi-graph-up-arrow"></i></span>
+        <strong class="fleet-stat-value">₺@(((decimal)ViewBag.AverageDailyPrice).ToString("N0"))</strong>
+        <span class="fleet-stat-label">Ortalama günlük ücret</span>
+    </article>
+</section>
+
 <!-- Cars Table List -->
-<div class="card glass p-4 border-0 text-start">
-    <h3 class="fs-5 font-weight-bold mb-4" style="color: #fff;"><i class="bi bi-list-stars text-primary"></i> Filo Envanteri</h3>
+<div class="card glass p-4 border-0 text-start fleet-inventory-card">
+    <div class="fleet-inventory-title">
+        <h3 class="fs-5 font-weight-bold m-0" style="color: #fff;"><i class="bi bi-grid-1x2-fill text-primary"></i> Filo Envanteri</h3>
+        <small>@ViewBag.TotalCars araç listeleniyor</small>
+    </div>
 
     <div class="table-responsive">
         <table class="admin-table">
@@ -56,27 +105,37 @@
                         string statusText = item.Car.IsAvailable ? "Müsait" : "Kirada/Bakımda";
                         string statusBadge = item.Car.IsAvailable ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning";
                         string adminCarImage = Carola.WebUI.Services.VehicleImageHelper.Resolve(Convert.ToString(item.Car.ImageUrl), Convert.ToString(item.Car.Model));
+                        string adminFallbackImage = Convert.ToString(item.CategoryName) switch
+                        {
+                            "SUV" => "/images/categories/suv.svg",
+                            "Sedan" => "/images/categories/sedan.svg",
+                            "Truck" => "/images/categories/truck.svg",
+                            "Spor" => "/images/categories/sport.svg",
+                            _ => "/images/categories/economy.svg"
+                        };
 
-                        <tr>
-                            <td>
-                                <img src="@adminCarImage" alt="@item.Car.Model" class="admin-thumb" onerror="this.onerror=null;this.src='/images/car-placeholder.svg';" />
+                        <tr class="fleet-row">
+                            <td colspan="2">
+                                <div class="fleet-vehicle">
+                                    <img src="@adminCarImage" alt="@item.Car.Model" class="admin-thumb" onerror="this.onerror=null;this.src='@adminFallbackImage';" />
+                                    <div>
+                                        <strong class="text-white d-block">@item.BrandName @item.Car.Model</strong>
+                                        <span class="text-muted" style="font-size: 11px;">@item.Car.ModelYear Model</span>
+                                    </div>
+                                </div>
                             </td>
-                            <td>
-                                <strong class="text-white d-block">@item.BrandName @item.Car.Model</strong>
-                                <span class="text-muted" style="font-size: 11px;">@item.Car.ModelYear Model</span>
-                            </td>
-                            <td><span class="badge bg-secondary">@item.Car.PlateNumber</span></td>
+                            <td><span class="fleet-plate">@item.Car.PlateNumber</span></td>
                             <td>@item.LocationName</td>
                             <td>@item.CategoryName</td>
-                            <td><strong>₺@item.Car.DailyPrice.ToString("N0")</strong></td>
+                            <td><strong class="fleet-price">₺@item.Car.DailyPrice.ToString("N0")</strong></td>
                             <td style="font-size: 12px; color: var(--muted);">
                                 @item.Car.FuelType | @item.Car.TransmissionType | @item.Car.SeatCount Kişilik
                             </td>
                             <td>
-                                <span class="badge @statusBadge">@statusText</span>
+                                <span class="fleet-status @statusBadge">@statusText</span>
                             </td>
                             <td class="text-end">
-                                <button class="btn btn-outline-light btn-sm me-2 edit-btn" 
+                                <button class="btn btn-outline-light btn-sm me-1 edit-btn fleet-action" title="Düzenle"
                                         data-bs-toggle="modal" 
                                         data-bs-target="#editCarModal"
                                         data-id="@item.Car.CarId"
@@ -94,9 +153,9 @@
                                         data-locid="@item.Car.LocationId"
                                         data-img="@item.Car.ImageUrl"
                                         data-available="@item.Car.IsAvailable.ToString().ToLower()">
-                                    Düzenle
+                                    <i class="bi bi-pencil"></i>
                                 </button>
-                                <a href="@Url.Action("Delete", "AdminCar", new { id = item.Car.CarId })" class="btn btn-danger-soft btn-sm" onclick="return confirm('Bu aracı silmek istediğinize emin misiniz?')">Sil</a>
+                                <a href="@Url.Action("Delete", "AdminCar", new { id = item.Car.CarId })" class="btn btn-danger-soft btn-sm fleet-action" title="Sil" onclick="return confirm('Bu aracı silmek istediğinize emin misiniz?')"><i class="bi bi-trash3"></i></a>
                             </td>
                         </tr>
                     }

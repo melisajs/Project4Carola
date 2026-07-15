@@ -35,6 +35,10 @@ namespace Carola.WebUI.Controllers
             ViewBag.Brands = brands;
             ViewBag.Categories = categories;
             ViewBag.Locations = locations;
+            ViewBag.TotalCars = cars.Count;
+            ViewBag.AvailableCars = cars.Count(c => c.IsAvailable);
+            ViewBag.UnavailableCars = cars.Count(c => !c.IsAvailable);
+            ViewBag.AverageDailyPrice = cars.Count > 0 ? cars.Average(c => c.DailyPrice) : 0;
 
             var viewModel = cars.Select(c => new {
                 Car = c,
