@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" role="img" aria-labelledby="title">
+  <title id="title">Sedan</title>
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#0b7a75"/><stop offset="1" stop-color="#45c5bb"/></linearGradient></defs>
+  <path fill="#e8f6f3" d="m34 83 35-9 37-36c7-7 15-11 26-11h61c11 0 20 4 28 12l37 37 30 8c8 2 13 9 13 17v12H20V99c0-8 5-14 14-16Z"/>
+  <path fill="url(#g)" d="m82 72 35-33c4-4 9-6 15-6h59c7 0 12 2 17 7l32 32H82Z"/>
+  <path fill="#caebe5" d="m120 39-34 33h70V39h-36Zm45 0h25c6 0 10 2 15 7l26 26h-66V39Z"/>
+  <path fill="#17383d" d="M25 88h272v25H20V99c0-5 2-9 5-11Z"/>
+  <circle cx="83" cy="113" r="24" fill="#17383d"/><circle cx="83" cy="113" r="11" fill="#dfe7e4"/>
+  <circle cx="243" cy="113" r="24" fill="#17383d"/><circle cx="243" cy="113" r="11" fill="#dfe7e4"/>
+  <path fill="#f2a65a" d="M269 82h22v7h-22z"/>
+</svg>

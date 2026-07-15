@@ -929,14 +929,15 @@ body {
 .category-tab-container { gap: 18px; flex-wrap: wrap; }
 .category-tab-item {
     min-width: 142px;
-    padding: 18px 15px;
-    background: #fff;
+    padding: 20px 16px 17px;
+    background: linear-gradient(155deg, #ffffff 40%, #f0f8f6);
     border: 1px solid var(--border-color);
     border-radius: 20px;
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
 }
-.category-tab-item:hover { border-color: rgba(11,122,117,.32); box-shadow: var(--shadow-md); }
-.category-tab-image { height: 64px; width: 105px; object-fit: contain; }
+.category-tab-item:hover { border-color: rgba(11,122,117,.32); box-shadow: var(--shadow-md); transform: translateY(-5px); }
+.category-tab-image { height: 72px; width: 116px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(17,55,57,.12)); }
 .category-tab-item.active .category-tab-label { color: var(--primary); }
 
 .best-card {
@@ -957,10 +958,25 @@ body {
 .car-card-price { color: var(--primary); }
 .car-card-spec-item i { color: var(--primary); }
 .car-card-btn {
-    background: #17383d;
+    color: #fff;
+    background: linear-gradient(135deg, #0b7a75, #135f61);
+    border: 1px solid rgba(7, 92, 89, .16);
     border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 22px rgba(11,122,117,.20);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
 }
-.car-card-btn:hover { background: var(--primary); }
+.car-card-btn:hover { color: #fff; background: linear-gradient(135deg, #096a66, #17383d); transform: translateY(-2px); box-shadow: 0 14px 28px rgba(11,122,117,.27); }
+.car-card-btn.is-disabled {
+    color: #7f8e8c;
+    background: #eef3f1;
+    border-color: #dfe8e5;
+    box-shadow: none;
+    cursor: not-allowed;
+}
 
 .brand-logo-card { border-radius: 18px; box-shadow: var(--shadow-sm); }
 .brand-logo-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }

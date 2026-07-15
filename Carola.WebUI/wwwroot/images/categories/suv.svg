@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" role="img" aria-labelledby="title">
+  <title id="title">SUV</title>
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#0b7a75"/><stop offset="1" stop-color="#45c5bb"/></linearGradient></defs>
+  <path fill="#e8f6f3" d="M44 79 71 42c8-11 19-17 33-17h91c15 0 27 6 38 17l29 30 23 8c8 3 13 10 13 18v17H24V95c0-9 7-16 20-16Z"/>
+  <path fill="url(#g)" d="m71 74 20-27c4-6 10-9 18-9h81c9 0 16 3 22 10l24 26H71Z"/>
+  <path fill="#cbe9e4" d="M98 42h48v32H77l21-32Zm61 0h29c8 0 14 3 20 9l21 23h-70V42Z"/>
+  <path fill="#17383d" d="M27 89h267c4 0 7 3 7 7v18H20V96c0-4 3-7 7-7Z"/>
+  <circle cx="82" cy="114" r="25" fill="#17383d"/><circle cx="82" cy="114" r="12" fill="#dfe7e4"/>
+  <circle cx="244" cy="114" r="25" fill="#17383d"/><circle cx="244" cy="114" r="12" fill="#dfe7e4"/>
+  <path fill="#f2a65a" d="M267 83h22v8h-22z"/>
+</svg>

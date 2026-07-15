@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" role="img" aria-labelledby="title">
+  <title id="title">Sports car</title>
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#ef8e46"/><stop offset="1" stop-color="#f2b45d"/></linearGradient></defs>
+  <path fill="#fff3df" d="m26 93 39-13 54-35c10-7 20-10 32-10h53c12 0 22 4 31 12l28 26 30 12c5 2 8 6 8 12v15H18V99c0-3 3-5 8-6Z"/>
+  <path fill="url(#g)" d="m80 78 48-31c7-4 14-6 22-6h50c8 0 15 3 21 8l29 29H80Z"/>
+  <path fill="#ffe2b7" d="m133 48-43 28h67V46h-13c-4 0-8 1-11 2Zm34-2h31c7 0 12 2 18 7l23 23h-72V46Z"/>
+  <path fill="#17383d" d="M20 94h280v18H18V99c0-2 1-4 2-5Z"/>
+  <circle cx="82" cy="111" r="23" fill="#17383d"/><circle cx="82" cy="111" r="10" fill="#f3eee5"/>
+  <circle cx="245" cy="111" r="23" fill="#17383d"/><circle cx="245" cy="111" r="10" fill="#f3eee5"/>
+  <path fill="#45c5bb" d="M271 83h23v7h-23z"/>
+</svg>

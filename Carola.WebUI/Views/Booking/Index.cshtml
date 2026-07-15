@@ -137,14 +137,14 @@
                                 <h3 class="m-0 font-weight-bold fs-5" style="color: #0c1729;">
                                     <span class="badge bg-primary me-2">2</span> @T.Translate("Sürücü Bilgileri", "Driver Information")
                                 </h3>
-                                <span class="text-muted" style="font-size: 12px;">@T.Translate("Kimlik ve ehliyet", "Identity and driving licence")</span>
+                                <span class="badge rounded-pill bg-primary-subtle text-primary">@T.Translate("OCR isteğe bağlı", "OCR optional")</span>
                             </div>
 
                             <!-- OCR Scan Panel -->
                             <div class="ocr-preview-box" id="ocrDropzone">
                                 <i class="bi bi-camera-fill text-primary" style="font-size: 32px;"></i>
                                 <div class="font-weight-bold mt-2">@T.Translate("Ehliyet / Kimlik Görseli Yükle", "Upload Driving Licence / ID Image")</div>
-                                <p class="text-muted m-0" style="font-size: 12px;">@T.Translate("Kimlik bilgileriniz OCR ile otomatik doldurulur; manuel giriş yapılamaz.", "Identity fields are filled automatically by OCR and cannot be entered manually.")</p>
+                                <p class="text-muted m-0" style="font-size: 12px;">@T.Translate("Bilgilerinizi elle girebilir veya görsel yükleyerek otomatik doldurabilirsiniz.", "Enter your details manually or upload an image to fill them automatically.")</p>
                                 <input type="file" id="ocrFileInput" accept="image/*" style="display: none;" />
                                 
                                 <div id="ocrLoader" class="mt-3" style="display: none;">
@@ -158,11 +158,11 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("AD", "FIRST NAME") *</label>
-                                    <input type="text" asp-for="FirstName" id="firstName" class="form-control" required readonly placeholder="@T.Translate("Ehliyet okutularak otomatik doldurulur", "Filled automatically after scanning")" />
+                                    <input type="text" asp-for="FirstName" id="firstName" class="form-control" required autocomplete="given-name" placeholder="@T.Translate("Adınızı yazın", "Enter your first name")" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("SOYAD", "LAST NAME") *</label>
-                                    <input type="text" asp-for="LastName" id="lastName" class="form-control" required readonly placeholder="@T.Translate("Ehliyet okutularak otomatik doldurulur", "Filled automatically after scanning")" />
+                                    <input type="text" asp-for="LastName" id="lastName" class="form-control" required autocomplete="family-name" placeholder="@T.Translate("Soyadınızı yazın", "Enter your last name")" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("E-POSTA", "EMAIL") *</label>
@@ -174,19 +174,19 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("DOĞUM TARİHİ", "DATE OF BIRTH") *</label>
-                                    <input type="date" asp-for="BirthDate" id="birthDate" class="form-control" required readonly />
+                                    <input type="date" asp-for="BirthDate" id="birthDate" class="form-control" required />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET SINIFI", "LICENCE CLASS") *</label>
-                                    <input type="text" asp-for="LicenseClass" id="licenseClass" class="form-control" required readonly placeholder="@T.Translate("Otomatik doldurulur", "Filled automatically")" />
+                                    <input type="text" asp-for="LicenseClass" id="licenseClass" class="form-control" required placeholder="B" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET NUMARASI", "LICENCE NUMBER") *</label>
-                                    <input type="text" asp-for="DriverLicenseNumber" id="licenseNumber" class="form-control" required readonly placeholder="@T.Translate("Otomatik doldurulur", "Filled automatically")" />
+                                    <input type="text" asp-for="DriverLicenseNumber" id="licenseNumber" class="form-control" required placeholder="@T.Translate("Ehliyet numaranızı yazın", "Enter your licence number")" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label font-weight-bold" style="font-size: 13px;">@T.Translate("EHLİYET VERİLİŞ TARİHİ", "LICENCE ISSUE DATE") *</label>
-                                    <input type="date" asp-for="LicenseIssueDate" id="licenseIssueDate" class="form-control" required readonly />
+                                    <input type="date" asp-for="LicenseIssueDate" id="licenseIssueDate" class="form-control" required />
                                 </div>
                             </div>
                         </div>
@@ -246,7 +246,7 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary btn-primary-custom w-100 py-3 d-flex align-items-center justify-content-center gap-2 font-weight-bold">
+                                <button type="submit" id="submitReservationButton" class="btn btn-primary btn-primary-custom w-100 py-3 d-flex align-items-center justify-content-center gap-2 font-weight-bold">
                                     <i class="bi bi-check-circle-fill"></i> @T.Translate("Rezervasyonu Tamamla", "Submit Reservation")
                                 </button>
                                 
@@ -379,7 +379,7 @@
             ocrLoader.querySelector('.spinner-border').style.display = 'none';
         }
 
-        // OCR Recognition logic using Tesseract.js. No identity field is manually editable.
+        // OCR is an optional convenience; every identity field also supports manual entry.
         ocrFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -422,6 +422,14 @@
                     ocrLoader.querySelector('.spinner-border').style.display = 'none';
                 });
             }
+        });
+
+        const bookingForm = document.getElementById('bookingForm');
+        const submitReservationButton = document.getElementById('submitReservationButton');
+        bookingForm?.addEventListener('submit', () => {
+            if (!bookingForm.checkValidity()) return;
+            submitReservationButton.disabled = true;
+            submitReservationButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@T.Translate("Rezervasyon oluşturuluyor...", "Creating reservation...")</span>';
         });
     </script>
 }

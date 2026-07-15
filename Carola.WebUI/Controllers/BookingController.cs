@@ -115,12 +115,12 @@ namespace Carola.WebUI.Controllers
                 return View(model);
             }
 
-            if (!model.OcrVerified || string.IsNullOrWhiteSpace(model.OcrRawText) ||
-                string.IsNullOrWhiteSpace(model.FirstName) || string.IsNullOrWhiteSpace(model.LastName) ||
+            if (string.IsNullOrWhiteSpace(model.FirstName) || string.IsNullOrWhiteSpace(model.LastName) ||
+                string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Phone) ||
                 !model.BirthDate.HasValue || !model.LicenseIssueDate.HasValue ||
                 string.IsNullOrWhiteSpace(model.LicenseClass) || string.IsNullOrWhiteSpace(model.DriverLicenseNumber))
             {
-                model.ErrorMessage = L("Rezervasyon için kimlik veya ehliyet görselini okutmanız ve OCR işlemini başarıyla tamamlamanız gerekir.", "Scan your ID or driving licence and complete OCR verification before booking.");
+                model.ErrorMessage = L("Lütfen zorunlu sürücü ve iletişim bilgilerini eksiksiz doldurun.", "Complete all required driver and contact details.");
                 return View(model);
             }
 
@@ -153,7 +153,7 @@ namespace Carola.WebUI.Controllers
                 PickupLocationId = model.PickupLocationId ?? 1,
                 ReturnLocationId = model.ReturnLocationId ?? 1,
                 TotalPrice = model.TotalPrice,
-                Description = $"OCR doğrulandı | Ehliyet sınıfı: {model.LicenseClass} | " +
+                Description = $"{(model.OcrVerified ? "OCR doğrulandı" : "Manuel giriş")} | Ehliyet sınıfı: {model.LicenseClass} | " +
                               $"Ehliyet veriliş: {model.LicenseIssueDate:dd.MM.yyyy} | " +
                               $"Not: {model.AdditionalNotes ?? "Belirtilmedi"}",
                 Status = "Bekliyor" // Starts as "Onay Bekleniyor" as required
